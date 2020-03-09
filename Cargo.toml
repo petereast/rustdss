@@ -5,3 +5,4 @@ authors = ["Peter East <peter@repositive.io>"]
 edition = "2018"
 
 [dependencies]
+nom = "5.1.1"
