@@ -9,3 +9,12 @@ It contains the following modules
 - `Requests`: deals with each indidual request, expists for the lifetime of a request
   - Responsible for interpreting parsed requests, and running them against the core.
 - `Core`: deals with the data, exists for the lifetime of the application.
+
+# Running it and testing it
+This uses the redis protocol, so you can test it by doing this:
+```bash
+cargo run --release &
+
+redis-benchmark -t set,get,ping -r 10000 -n 1000000
+
+```
