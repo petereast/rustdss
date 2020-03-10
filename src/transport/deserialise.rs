@@ -60,7 +60,7 @@ impl RespData {
         }
     }
 
-    pub fn from_char_stream<A>(value: &mut A) -> Self
+    pub fn from_char_stream<A>(value: &mut A) -> Option<Self>
     where
         A: Iterator<Item = char>,
     {
@@ -72,8 +72,8 @@ impl RespData {
         // - Streamed away - the resulting RESP data should be made available as a stream (or
         //   iterator? Not sure which one is better for this purpose?)
         //  - Maybe don't return a stream and also don't consume the stream?
-        let mut chunk = Self::parse_chunk(value).unwrap();
-        match chunk.get(0..1) {
+        let mut chunk = Self::parse_chunk(value)?;
+        Some(match chunk.get(0..1) {
             Some(":") => {
                 // good
                 // Only uses this chunk
@@ -105,9 +105,12 @@ impl RespData {
                             .into_iter()
                             .map(|_| {
                                 // Read the next value from the stream
-                                Self::from_char_stream(value)
+                                // TODO: Handle this error properly - we don't want any panics in
+                                // the parser!!
+                                Self::from_char_stream(value).expect("f")
                             })
                             .collect();
+
                         Self::List(vals)
                     }
                     _ => Self::Error("Can't read list".into()),
@@ -118,7 +121,7 @@ impl RespData {
                 // Could happen when the stream ends? Might not necessarily be an error case?
                 Self::Error("Unknown symbol or unexpected end of stream".into())
             }
-        }
+        })
     }
 }
 
