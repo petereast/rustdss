@@ -1,2 +1,3 @@
-mod deserialise;
-mod serialise;
+pub mod command;
+pub mod deserialise;
+pub mod serialise;
