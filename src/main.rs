@@ -3,9 +3,11 @@ mod core;
 mod request;
 mod transport;
 
-fn main() {
+fn main() -> Result<(), std::io::Error> {
     println!("Hello, world!");
 
-    core::Core::start();
-    connection::Connection::start();
+    let core = core::Core::start();
+    connection::Connection::start(core.get_sender())?;
+
+    Ok(())
 }
