@@ -1,7 +1,7 @@
 pub mod deserialise;
 pub mod serialise;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum RespData {
     Error(String),       // Errors are just text
     Number(i64),         // Numbers
