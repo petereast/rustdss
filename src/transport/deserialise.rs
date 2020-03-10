@@ -244,4 +244,24 @@ mod test {
             ]),
         )
     }
+
+    #[test]
+    fn it_works_with_streams() {
+        let mut test1 = ":123\r\n+hello\r\n-error\r\n".chars();
+
+        assert_eq!(
+            RespData::from_char_stream(&mut test1),
+            RespData::Number(123)
+        );
+
+        assert_eq!(
+            RespData::from_char_stream(&mut test1),
+            RespData::SimpleStr("hello".into())
+        );
+
+        assert_eq!(
+            RespData::from_char_stream(&mut test1),
+            RespData::Error("error".into())
+        );
+    }
 }
