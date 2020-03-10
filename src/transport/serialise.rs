@@ -8,7 +8,7 @@ impl RespData {
             RespData::Number(num) => format!(":{}\r\n", *num),
             RespData::BulkStr(string) => format!("${}\r\n{}\r\n", string.len(), *string),
             RespData::Error(err_text) => format!("-{}\r\n", *err_text),
-            _ => String::from("+OK"),
+            _ => String::from("-Not serialisable"),
         }
     }
 }
