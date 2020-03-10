@@ -16,13 +16,13 @@ impl Request {
                 // This will dispatch a request to the core -- how to deal with the response?
                 // Channels are a one way affair - maybe build a module to deal with this?
                 let (return_sender, recv) = sync_channel::<RespData>(5);
-                match (core_sender
+                match core_sender
                     .send((core_cmd, return_sender))
                     .map_err(|_| String::from("Can't send to core"))
                     .and(
                         recv.recv()
                             .map_err(|_| String::from("Can't recv from core")),
-                    )) {
+                    ) {
                     Ok(response) => response,
                     Err(message) => RespData::Error(message),
                 }

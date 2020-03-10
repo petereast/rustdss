@@ -27,7 +27,7 @@ impl Command {
     pub fn from_resp(input: RespData) -> Result<Self, String> {
         if let RespData::List(data) = input {
             if let Some(RespData::BulkStr(cmd_string)) = data.get(0) {
-                match cmd_string.as_str() {
+                match cmd_string.to_lowercase().as_str() {
                     "ping" => Ok(Command::Ping),
                     "echo" => {
                         if let Some(arg0) = data.get(1) {

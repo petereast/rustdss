@@ -26,6 +26,7 @@ impl Connection {
                 // Turn the bytes into a stream of chars!
                 //
                 let response = Request::handle(core_sender.clone(), input_data);
+
                 stream
                     .write(response.as_string().as_bytes())
                     .expect("Can't write to socket");

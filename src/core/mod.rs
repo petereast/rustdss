@@ -27,7 +27,6 @@ impl Core {
             };
             loop {
                 if let Ok(msg) = reciever.recv() {
-                    println!("[core] message recieved: {:?}", msg);
                     let (cmd, responder) = msg;
 
                     let response = match cmd {
@@ -35,13 +34,11 @@ impl Core {
                             state.keyval.insert(key, value);
                             RespData::SimpleStr("OK".into())
                         }
-                        Command::Get(key) => {
-                            (state
-                                .keyval
-                                .get(&key)
-                                .unwrap_or(&RespData::Error("nil".into()))
-                                .clone())
-                        }
+                        Command::Get(key) => state
+                            .keyval
+                            .get(&key)
+                            .unwrap_or(&RespData::Error("nil".into()))
+                            .clone(),
                         _ => RespData::Error("Unknown core cmd".into()),
                     };
 
