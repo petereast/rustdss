@@ -19,58 +19,14 @@ The client request should parse into:
 
 */
 
-#[derive(Debug, PartialEq)]
-pub enum RespData {
-    Error(String),       // Errors are just text
-    Number(i64),         // Numbers
-    SimpleStr(String),   // Simple strings are not prefixed with length
-    BulkStr(String),     // BulkStr is prefixed with it's length
-    List(Vec<RespData>), // Lists don't have to be made up of the same type
-}
+use super::RespData;
+use std::str::Chars;
 
 impl RespData {
-    fn parse_list(val: &mut std::str::Chars) -> Self {
-        // How do we parse multi dimensional arrays?
-        let count: String = val
-            .by_ref()
-            .scan(String::new(), |state, c| {
-                if !(['\r', '\n'].contains(&c)) {
-                    Some(format!("{}{}", state, c))
-                } else {
-                    None
-                }
-            })
-            .collect();
-        Self::Error("Fuck".into())
-    }
-    fn _parse_bulk_string(val: &mut std::str::Chars) -> Self {
-        let x: String = val
-            .by_ref()
-            .scan(String::new(), |state, c| {
-                if !(['\r', '\n'].contains(&c)) {
-                    Some(format!("{}{}", state, c))
-                } else {
-                    None
-                }
-            })
-            .collect();
-
-        let output_string = String::from(val.as_str().trim());
-        let expected_output_length: usize = x.parse().unwrap();
-
-        if output_string.len() != expected_output_length {
-            println!(
-                "x: {}, actual_len: {}",
-                expected_output_length,
-                output_string.len()
-            );
-            RespData::Error(String::from("String length check failed"))
-        } else {
-            RespData::BulkStr(String::from(val.as_str().trim()))
-        }
-    }
-
-    fn parse_bulk_string(stream: &mut std::str::Chars) -> Self {
+    fn parse_bulk_string<A>(stream: &mut A) -> Self
+    where
+        A: Iterator<Item = char>,
+    {
         // A bulk string is made up of two chunks: the first is an int indicating how long the
         // string is, and the second is the string it's self
         if let Some(second_chunk) = Self::parse_chunk(stream) {
@@ -81,7 +37,10 @@ impl RespData {
     }
 
     /// Just return the string until it reaches \r\n
-    fn parse_chunk(stream: &mut std::str::Chars) -> Option<String> {
+    fn parse_chunk<A>(stream: &mut A) -> Option<String>
+    where
+        A: Iterator<Item = char>,
+    {
         if let Some(first) = stream.next() {
             let output: String = stream
                 .scan(first, |mut state, item| {
@@ -101,7 +60,10 @@ impl RespData {
         }
     }
 
-    pub fn from_char_stream(value: &mut std::str::Chars) -> Self {
+    pub fn from_char_stream<A>(value: &mut A) -> Self
+    where
+        A: Iterator<Item = char>,
+    {
         // This returns an iterator of RESP data that can be given to an interpreter
         // The data must be:
         // - Chunked - RESP data is separated by `\r\n`, we need to be able to read off chunks of
@@ -153,8 +115,8 @@ impl RespData {
             }
 
             _ => {
-                // bad
-                Self::Error("Unknown symbol".into())
+                // Could happen when the stream ends? Might not necessarily be an error case?
+                Self::Error("Unknown symbol or unexpected end of stream".into())
             }
         }
     }
@@ -226,10 +188,10 @@ mod test {
         );
 
         // Police test
-        let mut test2 = "$15\r\nHELLOHELLOHELLO\r\n".chars();
+        let mut test2 = "$15\r\nHello, Hello, Hello!\r\n".chars();
         assert_eq!(
             RespData::from_char_stream(&mut test2),
-            RespData::BulkStr("HELLOHELLOHELLO".into())
+            RespData::BulkStr("Hello, Hello, Hello!".into())
         );
     }
 
@@ -265,3 +227,5 @@ mod test {
         );
     }
 }
+
+// TODO: Add some benchmarks!
