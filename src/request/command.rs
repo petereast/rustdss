@@ -7,6 +7,7 @@ pub enum Command {
     Echo(RespData),
     Get(String), // Do we want to use strings or do we want to use Resp values?
     Set(String, RespData),
+    FlushAll,
 }
 
 impl Command {
@@ -54,6 +55,7 @@ impl Command {
                             Err("nope".into())
                         }
                     }
+                    "flushall" => Ok(Command::FlushAll),
                     _ => Err("unknown command".into()),
                 }
             } else {

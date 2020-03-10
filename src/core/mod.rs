@@ -32,13 +32,17 @@ impl Core {
                     let response = match cmd {
                         Command::Set(key, value) => {
                             state.keyval.insert(key, value);
-                            RespData::SimpleStr("OK".into())
+                            RespData::ok()
                         }
                         Command::Get(key) => state
                             .keyval
                             .get(&key)
                             .unwrap_or(&RespData::Error("nil".into()))
                             .clone(),
+                        Command::FlushAll => {
+                            state.keyval.clear();
+                            RespData::ok()
+                        }
                         _ => RespData::Error("Unknown core cmd".into()),
                     };
 

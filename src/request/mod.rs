@@ -10,6 +10,7 @@ pub struct Request {}
 impl Request {
     pub fn handle(core_sender: SyncSender<Message>, input: RespData) -> RespData {
         match Command::from_resp(input) {
+            // Some commands don't even need to touch the core.
             Ok(Command::Ping) => RespData::SimpleStr("PONG".into()),
             Ok(Command::Echo(data)) => data,
             Ok(core_cmd) => {
