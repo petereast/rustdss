@@ -43,7 +43,7 @@ impl RespData {
             .collect();
         Self::Error("Fuck".into())
     }
-    fn parse_bulk_string(val: &mut std::str::Chars) -> Self {
+    fn _parse_bulk_string(val: &mut std::str::Chars) -> Self {
         let x: String = val
             .by_ref()
             .scan(String::new(), |state, c| {
@@ -67,6 +67,16 @@ impl RespData {
             RespData::Error(String::from("String length check failed"))
         } else {
             RespData::BulkStr(String::from(val.as_str().trim()))
+        }
+    }
+
+    fn parse_bulk_string(stream: &mut std::str::Chars) -> Self {
+        // A bulk string is made up of two chunks: the first is an int indicating how long the
+        // string is, and the second is the string it's self
+        if let Some(second_chunk) = Self::parse_chunk(stream) {
+            Self::BulkStr(second_chunk.into())
+        } else {
+            Self::Error("Can't process bulk string".into())
         }
     }
 
@@ -121,11 +131,25 @@ impl RespData {
             Some("$") => {
                 // Uses more than one chunk - Will need to lend the stream to the parser
                 // function
-                Self::Error("Unimplemented".into())
+                // Doesn't need the current chunk, the next one will contain the entire string
+                Self::parse_bulk_string(value)
             }
             Some("*") => {
                 // Uses more than one chunk - Will need to lend the stream to the parser
-                Self::Error("Unimplemented".into())
+                match chunk.split_off(1).parse::<usize>() {
+                    Ok(i) => {
+                        // Read the following number of VALUES, not chunks!!
+                        let vals: Vec<Self> = (0..i)
+                            .into_iter()
+                            .map(|_| {
+                                // Read the next value from the stream
+                                Self::from_char_stream(value)
+                            })
+                            .collect();
+                        Self::List(vals)
+                    }
+                    _ => Self::Error("Can't read list".into()),
+                }
             }
 
             _ => {
@@ -133,24 +157,6 @@ impl RespData {
                 Self::Error("Unknown symbol".into())
             }
         }
-    }
-    pub fn from_string(value: String) -> Result<Self, String> {
-        // This needs to be from a stream
-        let mut chars = value.chars();
-
-        Ok(match chars.next().unwrap_or('?') {
-            '-' => RespData::Error(String::from(chars.as_str().trim())),
-            ':' => RespData::Number(
-                String::from(chars.as_str())
-                    .trim()
-                    .parse()
-                    .map_err(|_| "Can't parse integer")?,
-            ),
-            '+' => RespData::SimpleStr(String::from(chars.as_str().trim())),
-            '$' => RespData::parse_bulk_string(&mut chars),
-            '*' => unimplemented!(), // Parse list of RESP values
-            _ => RespData::Error("Unknown leading character".into()),
-        })
     }
 }
 
@@ -160,66 +166,82 @@ mod test {
 
     #[test]
     fn it_parses_simple_strings() {
-        let test1 = String::from("+HELLO\r\n");
+        let mut test1 = "+HELLO\r\n".chars();
 
         assert_eq!(
-            RespData::from_string(test1),
-            Ok(RespData::SimpleStr("HELLO".into()))
+            RespData::from_char_stream(&mut test1),
+            RespData::SimpleStr("HELLO".into())
         );
 
-        let test2 = String::from("+Hello World this Has Upper And LowerCase LEtTTers\r\n");
+        let mut test2 = "+Hello World this Has Upper And LowerCase LEtTTers\r\n".chars();
 
         assert_eq!(
-            RespData::from_string(test2),
-            Ok(RespData::SimpleStr(
-                "Hello World this Has Upper And LowerCase LEtTTers".into()
-            ))
+            RespData::from_char_stream(&mut test2),
+            RespData::SimpleStr("Hello World this Has Upper And LowerCase LEtTTers".into())
         );
 
-        let test3 = String::from("+12345\r\n");
+        let mut test3 = "+12345\r\n".chars();
 
         assert_eq!(
-            RespData::from_string(test3),
-            Ok(RespData::SimpleStr("12345".into()))
+            RespData::from_char_stream(&mut test3),
+            RespData::SimpleStr("12345".into())
         );
     }
 
     #[test]
     fn it_parses_error_strings() {
-        let test1 = String::from("-Error\r\n");
+        let mut test1 = "-Error\r\n".chars();
 
         assert_eq!(
-            RespData::from_string(test1),
-            Ok(RespData::Error("Error".into()))
+            RespData::from_char_stream(&mut test1),
+            RespData::Error("Error".into())
         );
     }
 
     #[test]
     fn it_parses_numbers() {
-        let test1 = String::from(":100\r\n");
-        let test2 = String::from(":-100\r\n");
-        let test3 = String::from(":invalidnumber\r\n");
-        assert_eq!(RespData::from_string(test1), Ok(RespData::Number(100)));
-        assert_eq!(RespData::from_string(test2), Ok(RespData::Number(-100)));
+        let mut test1 = ":100\r\n".chars();
+        let mut test2 = ":-100\r\n".chars();
+        let mut test3 = ":invalidnumber\r\n".chars();
         assert_eq!(
-            RespData::from_string(test3),
-            Err("Can't parse integer".into())
+            RespData::from_char_stream(&mut test1),
+            RespData::Number(100)
+        );
+        assert_eq!(
+            RespData::from_char_stream(&mut test2),
+            RespData::Number(-100)
+        );
+        assert_eq!(
+            RespData::from_char_stream(&mut test3),
+            RespData::Error("Can't parse number!".into())
         );
     }
 
     #[test]
     fn it_parses_bulk_strings() {
-        let test1 = String::from("$5\r\nHELLO\r\n");
+        let mut test1 = "$5\r\nHELLO\r\n".chars();
         assert_eq!(
-            RespData::from_string(test1),
-            Ok(RespData::BulkStr("HELLO".into()))
+            RespData::from_char_stream(&mut test1),
+            RespData::BulkStr("HELLO".into())
         );
 
         // Police test
-        let test2 = String::from("$15\r\nHELLOHELLOHELLO\r\n");
+        let mut test2 = "$15\r\nHELLOHELLOHELLO\r\n".chars();
         assert_eq!(
-            RespData::from_string(test2),
-            Ok(RespData::BulkStr("HELLOHELLOHELLO".into()))
+            RespData::from_char_stream(&mut test2),
+            RespData::BulkStr("HELLOHELLOHELLO".into())
         );
+    }
+
+    #[test]
+    fn it_parses_lists() {
+        let mut test1 = "*2\r\n$4\r\nLLEN\r\n$6\r\nmylist\r\n".chars();
+        assert_eq!(
+            RespData::from_char_stream(&mut test1),
+            RespData::List(vec![
+                RespData::BulkStr("LLEN".into()),
+                RespData::BulkStr("mylist".into()),
+            ]),
+        )
     }
 }
