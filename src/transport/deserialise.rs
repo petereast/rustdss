@@ -20,7 +20,6 @@ The client request should parse into:
 */
 
 use super::RespData;
-use std::str::Chars;
 
 impl RespData {
     fn parse_bulk_string<A>(stream: &mut A) -> Self
@@ -43,7 +42,7 @@ impl RespData {
     {
         if let Some(first) = stream.next() {
             let output: String = stream
-                .scan(first, |mut state, item| {
+                .scan(first, |state, item| {
                     if item == '\n' && *state == '\r' {
                         None
                     } else {
@@ -135,21 +134,23 @@ mod test {
 
         assert_eq!(
             RespData::from_char_stream(&mut test1),
-            RespData::SimpleStr("HELLO".into())
+            Some(RespData::SimpleStr("HELLO".into()))
         );
 
         let mut test2 = "+Hello World this Has Upper And LowerCase LEtTTers\r\n".chars();
 
         assert_eq!(
             RespData::from_char_stream(&mut test2),
-            RespData::SimpleStr("Hello World this Has Upper And LowerCase LEtTTers".into())
+            Some(RespData::SimpleStr(
+                "Hello World this Has Upper And LowerCase LEtTTers".into()
+            ))
         );
 
         let mut test3 = "+12345\r\n".chars();
 
         assert_eq!(
             RespData::from_char_stream(&mut test3),
-            RespData::SimpleStr("12345".into())
+            Some(RespData::SimpleStr("12345".into()))
         );
     }
 
@@ -159,7 +160,7 @@ mod test {
 
         assert_eq!(
             RespData::from_char_stream(&mut test1),
-            RespData::Error("Error".into())
+            Some(RespData::Error("Error".into()))
         );
     }
 
@@ -170,15 +171,15 @@ mod test {
         let mut test3 = ":invalidnumber\r\n".chars();
         assert_eq!(
             RespData::from_char_stream(&mut test1),
-            RespData::Number(100)
+            Some(RespData::Number(100))
         );
         assert_eq!(
             RespData::from_char_stream(&mut test2),
-            RespData::Number(-100)
+            Some(RespData::Number(-100))
         );
         assert_eq!(
             RespData::from_char_stream(&mut test3),
-            RespData::Error("Can't parse number!".into())
+            Some(RespData::Error("Can't parse number!".into()))
         );
     }
 
@@ -187,14 +188,14 @@ mod test {
         let mut test1 = "$5\r\nHELLO\r\n".chars();
         assert_eq!(
             RespData::from_char_stream(&mut test1),
-            RespData::BulkStr("HELLO".into())
+            Some(RespData::BulkStr("HELLO".into()))
         );
 
         // Police test
         let mut test2 = "$15\r\nHello, Hello, Hello!\r\n".chars();
         assert_eq!(
             RespData::from_char_stream(&mut test2),
-            RespData::BulkStr("Hello, Hello, Hello!".into())
+            Some(RespData::BulkStr("Hello, Hello, Hello!".into()))
         );
     }
 
@@ -203,10 +204,10 @@ mod test {
         let mut test1 = "*2\r\n$4\r\nLLEN\r\n$6\r\nmylist\r\n".chars();
         assert_eq!(
             RespData::from_char_stream(&mut test1),
-            RespData::List(vec![
+            Some(RespData::List(vec![
                 RespData::BulkStr("LLEN".into()),
                 RespData::BulkStr("mylist".into()),
-            ]),
+            ])),
         )
     }
 
@@ -216,17 +217,17 @@ mod test {
 
         assert_eq!(
             RespData::from_char_stream(&mut test1),
-            RespData::Number(123)
+            Some(RespData::Number(123))
         );
 
         assert_eq!(
             RespData::from_char_stream(&mut test1),
-            RespData::SimpleStr("hello".into())
+            Some(RespData::SimpleStr("hello".into()))
         );
 
         assert_eq!(
             RespData::from_char_stream(&mut test1),
-            RespData::Error("error".into())
+            Some(RespData::Error("error".into()))
         );
     }
 }
