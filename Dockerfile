@@ -5,4 +5,5 @@ RUN cargo install --path .
 
 FROM debian:buster-slim
 COPY --from=builder /usr/local/cargo/bin/rustdss /usr/local/bin/rustdss
+EXPOSE 6379
 CMD ["rustdss"]

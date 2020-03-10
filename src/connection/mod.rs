@@ -36,7 +36,7 @@ impl Connection {
     pub fn start(core_sender: SyncSender<Command>) -> std::io::Result<Self> {
         println!("[connection] Starting to listen to connections");
 
-        let listener = TcpListener::bind("0.0.0.0:65533")?;
+        let listener = TcpListener::bind("0.0.0.0:6379")?;
 
         for stream in listener.incoming() {
             Connection::handle_incoming_stream(core_sender.clone(), &mut stream?)
