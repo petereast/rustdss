@@ -18,3 +18,17 @@ cargo run --release &
 redis-benchmark -t set,get,ping -r 10000 -n 1000000
 
 ```
+
+# Project Roadmap
+- Increase command coverage
+  - Start serialising lists
+    - as a stream
+  - handle different data types in the backing store
+    - starting with list operations
+    - Then sets
+    - Then maps
+- Increase underlying datastructure performance
+  - Use a radix tree to support lower O operations.
+- Basic pubsub stuff
+  - need to support blocking commands/responses
+
