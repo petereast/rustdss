@@ -1,4 +1,4 @@
-use crate::request::command::Command;
+use crate::request::command::{Command, Key};
 use crate::transport::RespData;
 use std::collections::HashMap;
 use std::sync::mpsc::{sync_channel, SyncSender};
@@ -12,7 +12,7 @@ pub struct Core {
 }
 
 struct CoreState {
-    keyval: HashMap<String, RespData>,
+    keyval: HashMap<Key, RespData>,
 }
 
 fn core_logic(state: &mut CoreState, cmd: Command) -> RespData {
@@ -29,6 +29,22 @@ fn core_logic(state: &mut CoreState, cmd: Command) -> RespData {
         Command::FlushAll => {
             state.keyval.clear();
             RespData::ok()
+        }
+        Command::Incr(key, maybe_by) => {
+            let prev = state.keyval.get(&key);
+
+            let op = match prev {
+                Some(RespData::Number(val)) => Ok(RespData::Number(val + maybe_by.unwrap_or(1))),
+                Some(_) => Err(RespData::Error("NaN".into())),
+                None => Ok(RespData::Number(1)),
+            };
+
+            if let Ok(new_val) = op {
+                state.keyval.insert(key, new_val.clone());
+                new_val
+            } else {
+                op.err().unwrap()
+            }
         }
         _ => RespData::Error("Unknown core cmd".into()),
     };
@@ -118,5 +134,27 @@ mod test {
         assert_eq!(state.keyval.len(), 0);
         assert_eq!(state.keyval.get("a"), None);
         assert_eq!(state.keyval.get("b"), None);
+    }
+
+    #[test]
+    fn incr() {
+        let mut state = CoreState {
+            keyval: HashMap::new(),
+        };
+
+        // It creates a key when there isn't one
+        let response = core_logic(&mut state, Command::Incr("a".into(), None));
+        assert_eq!(state.keyval.get("a"), Some(&RespData::Number(1)));
+        assert_eq!(response, RespData::Number(1));
+
+        // It increments existing keys
+        let response = core_logic(&mut state, Command::Incr("a".into(), None));
+        assert_eq!(state.keyval.get("a"), Some(&RespData::Number(2)));
+        assert_eq!(response, RespData::Number(2));
+
+        // It increments by the given amount
+        let response = core_logic(&mut state, Command::Incr("a".into(), Some(10)));
+        assert_eq!(state.keyval.get("a"), Some(&RespData::Number(12)));
+        assert_eq!(response, RespData::Number(12));
     }
 }
