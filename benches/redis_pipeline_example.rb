@@ -10,7 +10,7 @@ end
 def without_pipelining
     r = Redis.new
     10000.times {
-        r.ping
+        r.incr "b"
     }
 end
 
@@ -18,7 +18,7 @@ def with_pipelining
     r = Redis.new
     r.pipelined {
         10000.times {
-          r.ping
+          r.incr "a"
         }
     }
 end
