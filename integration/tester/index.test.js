@@ -9,9 +9,8 @@ test("it connects to both clients", async (t) => {
   t.truthy(await clientB.ping());
 })
 
-test("get and set behaviour is the same", (t) => {
-    t.pass()
+test.todo("get and set behaviour is the same");
 
-});
+test.todo("it can incr and decr a value");
 
 // Test get/set behaviour
