@@ -10,6 +10,7 @@ pub enum Command {
     Get(Key), // Do we want to use strings or do we want to use Resp values?
     Set(Key, RespData),
     Incr(Key, Option<Number>),
+    Decr(Key, Option<Number>),
     FlushAll,
 }
 
@@ -68,6 +69,20 @@ impl Command {
                         }
                     }
                     "flushall" => Ok(Command::FlushAll),
+                    "decr" => {
+                        if let Some(arg0) = Self::string_arg(data.next()) {
+                            Ok(Command::Decr(arg0, None))
+                        } else {
+                            Err("Not enough args".into())
+                        }
+                    }
+                    "decrby" => {
+                        if let Some(arg0) = Self::string_arg(data.next()) {
+                            Ok(Command::Decr(arg0, Self::numerical_arg(data.next())))
+                        } else {
+                            Err("Not enough args".into())
+                        }
+                    }
                     "incr" => {
                         if let Some(arg0) = Self::string_arg(data.next()) {
                             Ok(Command::Incr(arg0, None))

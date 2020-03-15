@@ -46,6 +46,22 @@ fn core_logic(state: &mut CoreState, cmd: Command) -> RespData {
                 op.err().unwrap()
             }
         }
+        Command::Decr(key, maybe_by) => {
+            let prev = state.keyval.get(&key);
+
+            let op = match prev {
+                Some(RespData::Number(val)) => Ok(RespData::Number(val - maybe_by.unwrap_or(1))),
+                Some(_) => Err(RespData::Error("NaN".into())),
+                None => Ok(RespData::Number(-1)),
+            };
+
+            if let Ok(new_val) = op {
+                state.keyval.insert(key, new_val.clone());
+                new_val
+            } else {
+                op.err().unwrap()
+            }
+        }
         _ => RespData::Error("Unknown core cmd".into()),
     };
     response
@@ -156,5 +172,27 @@ mod test {
         let response = core_logic(&mut state, Command::Incr("a".into(), Some(10)));
         assert_eq!(state.keyval.get("a"), Some(&RespData::Number(12)));
         assert_eq!(response, RespData::Number(12));
+    }
+
+    #[test]
+    fn decr() {
+        let mut state = CoreState {
+            keyval: HashMap::new(),
+        };
+
+        // It creates a key when there isn't one
+        let response = core_logic(&mut state, Command::Decr("a".into(), None));
+        assert_eq!(state.keyval.get("a"), Some(&RespData::Number(-1)));
+        assert_eq!(response, RespData::Number(-1));
+
+        // It decrements existing keys
+        let response = core_logic(&mut state, Command::Decr("a".into(), None));
+        assert_eq!(state.keyval.get("a"), Some(&RespData::Number(-2)));
+        assert_eq!(response, RespData::Number(-2));
+
+        // It decrements by the given amount
+        let response = core_logic(&mut state, Command::Decr("a".into(), Some(10)));
+        assert_eq!(state.keyval.get("a"), Some(&RespData::Number(-12)));
+        assert_eq!(response, RespData::Number(-12));
     }
 }
