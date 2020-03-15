@@ -13,6 +13,7 @@ impl Request {
             // Some commands don't even need to touch the core.
             Ok(Command::Ping) => RespData::SimpleStr("PONG".into()),
             Ok(Command::Echo(data)) => data,
+            Ok(Command::Info) => RespData::SimpleStr("info".into()),
             Ok(core_cmd) => {
                 // This will dispatch a request to the core -- how to deal with the response?
                 // Channels are a one way affair - maybe build a module to deal with this?
