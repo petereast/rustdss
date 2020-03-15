@@ -70,6 +70,13 @@ impl Command {
                     "flushall" => Ok(Command::FlushAll),
                     "incr" => {
                         if let Some(arg0) = Self::string_arg(data.next()) {
+                            Ok(Command::Incr(arg0, None))
+                        } else {
+                            Err("Not enough args".into())
+                        }
+                    }
+                    "incrby" => {
+                        if let Some(arg0) = Self::string_arg(data.next()) {
                             Ok(Command::Incr(arg0, Self::numerical_arg(data.next())))
                         } else {
                             Err("Not enough args".into())
