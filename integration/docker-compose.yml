@@ -1,0 +1,14 @@
+version: '3'
+services:
+  rustdss:
+    image: 'docker.pkg.github.com/petereast/rustdss/rustdss:latest'
+  redis:
+    image: 'redis:5'
+
+  tester:
+    image: 'node:10'
+    working_dir: "/opt/tester"
+    command: ["npm", "test"]
+    volumes:
+      - ./tester/:/opt/tester
+      - ./config/:/etc/reviewer/:z
