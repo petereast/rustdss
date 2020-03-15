@@ -12,6 +12,11 @@ def without_pipelining
     10000.times {
         r.incr "b"
     }
+    10000.times {
+      r.decr "b"
+    }
+
+    puts "This should be zero: ", (r.get "b")
 end
 
 def with_pipelining
@@ -20,7 +25,12 @@ def with_pipelining
         10000.times {
           r.incr "a"
         }
+        10000.times {
+          r.decr "a"
+        }
+
     }
+    puts "This should be zero: ", (r.get "a")
 end
 
 bench("without pipelining") {
