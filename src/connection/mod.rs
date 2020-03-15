@@ -1,7 +1,6 @@
 use crate::core::Message;
-use crate::request::command::Command;
 use crate::request::Request;
-use crate::transport::{deserialise, RespData};
+use crate::transport::RespData;
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::sync::mpsc::SyncSender;
