@@ -11,6 +11,7 @@ pub enum Command {
     Set(Key, RespData),
     Incr(Key, Option<Number>),
     Decr(Key, Option<Number>),
+    Info,
     FlushAll,
 }
 
@@ -97,6 +98,7 @@ impl Command {
                             Err("Not enough args".into())
                         }
                     }
+                    "info" => Ok(Command::Info),
                     _ => Err("unknown command".into()),
                 }
             } else {
