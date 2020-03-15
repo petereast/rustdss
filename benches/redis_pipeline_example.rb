@@ -4,15 +4,17 @@ require 'redis'
 def bench(descr)
     start = Time.now
     yield
-    puts "#{descr} #{Time.now-start} seconds"
+    total_time = Time.new - start
+    count_per_second = 100000 / total_time
+    puts "#{descr} #{total_time} seconds, #{count_per_second} ops per sec"
 end
 
 def without_pipelining
     r = Redis.new
-    10000.times {
+    100000.times {
         r.incr "b"
     }
-    10000.times {
+    100000.times {
       r.decr "b"
     }
 
@@ -22,10 +24,10 @@ end
 def with_pipelining
     r = Redis.new
     r.pipelined {
-        10000.times {
+        100000.times {
           r.incr "a"
         }
-        10000.times {
+        100000.times {
           r.decr "a"
         }
 
