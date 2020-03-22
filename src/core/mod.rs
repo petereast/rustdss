@@ -24,7 +24,7 @@ fn core_logic(state: &mut CoreState, cmd: Command) -> RespData {
         Command::Get(key) => state
             .keyval
             .get(&key)
-            .unwrap_or(&RespData::Error("nil".into()))
+            .unwrap_or(&RespData::Error("(nil)".into()))
             .clone(),
         Command::FlushAll => {
             state.keyval.clear();
@@ -117,6 +117,65 @@ mod test {
         assert_eq!(
             state.keyval.get("a"),
             Some(&RespData::SimpleStr("hello".into()))
+        );
+    }
+
+    #[test]
+    fn get_gets_a_key() {
+        let mut inner_keyval = HashMap::new();
+        inner_keyval.insert("a".into(), RespData::SimpleStr("hello".into()));
+
+        let mut state = CoreState {
+            keyval: inner_keyval,
+        };
+
+        let response = core_logic(&mut state, Command::Get("a".into()));
+
+        assert_eq!(response, RespData::SimpleStr("hello".into()));
+        assert_eq!(state.keyval.len(), 1);
+        assert_eq!(
+            state.keyval.get("a"),
+            Some(&RespData::SimpleStr("hello".into()))
+        );
+    }
+
+    #[test]
+    fn get_returns_nil_when_key_is_not_found() {
+        let mut state = CoreState {
+            keyval: HashMap::new(),
+        };
+
+        let response = core_logic(&mut state, Command::Get("a".into()));
+
+        assert_eq!(response, RespData::Error("(nil)".into()));
+        assert_eq!(state.keyval.len(), 0);
+        assert_eq!(state.keyval.get("a"), None);
+    }
+
+    #[test]
+    fn set_overwrites_existing_value() {
+        let mut state = CoreState {
+            keyval: HashMap::new(),
+        };
+
+        let key: String = "key-a".into();
+
+        let response_a = core_logic(
+            &mut state,
+            Command::Set(key.clone(), RespData::SimpleStr("hello".into())),
+        );
+
+        let response_b = core_logic(
+            &mut state,
+            Command::Set(key.clone(), RespData::SimpleStr("goodbye".into())),
+        );
+
+        assert_eq!(response_a, RespData::ok());
+        assert_eq!(response_b, RespData::ok());
+        assert_eq!(state.keyval.len(), 1);
+        assert_eq!(
+            state.keyval.get(&key),
+            Some(&RespData::SimpleStr("goodbye".into()))
         );
     }
 
