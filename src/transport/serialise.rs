@@ -2,12 +2,20 @@
 use super::RespData;
 
 impl RespData {
+    fn serialise_list(items: &Vec<RespData>) -> String {
+        let len = items.len();
+
+        let content: String = items.into_iter().map(|item| item.as_string()).collect();
+
+        format!("*{}\r\n{}", len, content)
+    }
     pub fn as_string(&self) -> String {
         match self {
             RespData::SimpleStr(data) => format!("+{}\r\n", *data),
             RespData::Number(num) => format!(":{}\r\n", *num),
             RespData::BulkStr(string) => format!("${}\r\n{}\r\n", string.len(), *string),
             RespData::Error(err_text) => format!("-{}\r\n", *err_text),
+            RespData::List(items) => Self::serialise_list(items),
             _ => String::from("-Not serialisable"),
         }
     }
@@ -33,6 +41,10 @@ mod tests {
         let input = RespData::Number(10);
 
         assert_eq!(input.as_string(), ":10\r\n");
+
+        let input = RespData::Number(-10);
+
+        assert_eq!(input.as_string(), ":-10\r\n");
     }
     #[test]
     fn it_serialises_bulk_strings_properly() {
