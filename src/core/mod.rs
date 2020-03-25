@@ -98,7 +98,7 @@ impl Core {
     }
 }
 #[cfg(test)]
-mod test {
+mod should {
     use super::*;
 
     #[test]

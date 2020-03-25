@@ -125,11 +125,11 @@ impl RespData {
 }
 
 #[cfg(test)]
-mod test {
+mod should {
     use super::*;
 
     #[test]
-    fn it_parses_simple_strings() {
+    fn parse_simple_strings() {
         let mut test1 = "+HELLO\r\n".chars();
 
         assert_eq!(
@@ -155,7 +155,7 @@ mod test {
     }
 
     #[test]
-    fn it_parses_error_strings() {
+    fn parse_error_strings() {
         let mut test1 = "-Error\r\n".chars();
 
         assert_eq!(
@@ -165,7 +165,7 @@ mod test {
     }
 
     #[test]
-    fn it_parses_numbers() {
+    fn parse_numbers() {
         let mut test1 = ":100\r\n".chars();
         let mut test2 = ":-100\r\n".chars();
         let mut test3 = ":invalidnumber\r\n".chars();
@@ -184,7 +184,7 @@ mod test {
     }
 
     #[test]
-    fn it_parses_bulk_strings() {
+    fn parse_bulk_strings() {
         let mut test1 = "$5\r\nHELLO\r\n".chars();
         assert_eq!(
             RespData::from_char_stream(&mut test1),
@@ -200,7 +200,7 @@ mod test {
     }
 
     #[test]
-    fn it_parses_lists() {
+    fn parse_lists() {
         let mut test1 = "*2\r\n$4\r\nllen\r\n$6\r\nmylist\r\n".chars();
         assert_eq!(
             RespData::from_char_stream(&mut test1),
@@ -211,7 +211,7 @@ mod test {
         )
     }
     #[test]
-    fn it_derialises_multi_dimensional_lists_properly() {
+    fn parse_multi_dimensional_lists() {
         let expected_output = RespData::List(vec![
             RespData::List(vec![
                 RespData::SimpleStr("aaa".into()),
@@ -236,7 +236,7 @@ mod test {
     }
 
     #[test]
-    fn it_errors_when_it_gets_gibberish() {
+    fn emit_an_error_when_it_gets_gibberish() {
         let mut input1 = "sjsdbsfkljbfklsdjbfskldjfbs jfsdfksjbdflksjbfskjfbsklfjb".chars();
         assert_eq!(
             RespData::from_char_stream(&mut input1),
@@ -247,7 +247,7 @@ mod test {
     }
 
     #[test]
-    fn it_works_with_streams() {
+    fn work_with_streams() {
         let mut test1 = ":123\r\n+hello\r\n-error\r\n".chars();
 
         assert_eq!(
