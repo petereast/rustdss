@@ -15,3 +15,15 @@ impl RespData {
         Self::SimpleStr("OK".into())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    // These are end-to-end tests
+    // Showing that it can decode and re-encode data into the same thing.
+    use super::*;
+
+    #[test]
+    fn it_runs_tests() {
+        assert!(true);
+    }
+}

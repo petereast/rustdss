@@ -201,14 +201,49 @@ mod test {
 
     #[test]
     fn it_parses_lists() {
-        let mut test1 = "*2\r\n$4\r\nLLEN\r\n$6\r\nmylist\r\n".chars();
+        let mut test1 = "*2\r\n$4\r\nllen\r\n$6\r\nmylist\r\n".chars();
         assert_eq!(
             RespData::from_char_stream(&mut test1),
             Some(RespData::List(vec![
-                RespData::BulkStr("LLEN".into()),
+                RespData::BulkStr("llen".into()),
                 RespData::BulkStr("mylist".into()),
             ])),
         )
+    }
+    #[test]
+    fn it_derialises_multi_dimensional_lists_properly() {
+        let expected_output = RespData::List(vec![
+            RespData::List(vec![
+                RespData::SimpleStr("aaa".into()),
+                RespData::SimpleStr("bbb".into()),
+            ]),
+            RespData::List(vec![
+                RespData::SimpleStr("ccc".into()),
+                RespData::SimpleStr("ddd".into()),
+            ]),
+            RespData::List(vec![
+                RespData::SimpleStr("eee".into()),
+                RespData::SimpleStr("fff".into()),
+            ]),
+        ]);
+        let mut input =
+            "*3\r\n*2\r\n+aaa\r\n+bbb\r\n*2\r\n+ccc\r\n+ddd\r\n*2\r\n+eee\r\n+fff\r\n".chars();
+
+        assert_eq!(
+            RespData::from_char_stream(&mut input),
+            Some(expected_output)
+        );
+    }
+
+    #[test]
+    fn it_errors_when_it_gets_gibberish() {
+        let mut input1 = "sjsdbsfkljbfklsdjbfskldjfbs jfsdfksjbdflksjbfskjfbsklfjb".chars();
+        assert_eq!(
+            RespData::from_char_stream(&mut input1),
+            Some(RespData::Error(
+                "Unknown symbol or unexpected end of stream".into()
+            )),
+        );
     }
 
     #[test]
