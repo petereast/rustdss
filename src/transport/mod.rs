@@ -17,13 +17,13 @@ impl RespData {
 }
 
 #[cfg(test)]
-mod tests {
+mod should {
     // These are end-to-end tests
     // Showing that it can decode and re-encode data into the same thing.
     use super::*;
 
     #[test]
-    fn it_runs_tests() {
+    fn run_tests() {
         assert!(true);
     }
 }
