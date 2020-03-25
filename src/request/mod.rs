@@ -19,7 +19,7 @@ impl Request {
                 // Channels are a one way affair - maybe build a module to deal with this?
                 let (return_sender, recv) = sync_channel::<RespData>(5);
                 match core_sender
-                    .send((core_cmd, return_sender))
+                    .send((String::new(), core_cmd, return_sender))
                     .map_err(|_| String::from("Can't send to core"))
                     .and(
                         recv.recv()
