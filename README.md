@@ -29,6 +29,7 @@ redis-benchmark -t set,get,ping -r 10000 -n 1000000
     - starting with list operations
     - Then sets
     - Then maps
+- Refactor the `core` module into a separate crate, so it can be embedded.
 - Increase underlying datastructure performance
   - Use a radix tree to support lower O operations.
 - Basic pubsub stuff
