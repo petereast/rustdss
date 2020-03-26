@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use std::sync::mpsc::{sync_channel, SyncSender};
 use std::thread;
 
+mod admin;
 mod base_logic;
 mod key_val;
 mod number;
@@ -49,6 +50,7 @@ impl Core {
         println!("[core] starting core");
         let (sender, reciever) = sync_channel::<Message>(50);
 
+        // Each database get's it's own thread
         thread::spawn(move || {
             // This thread needs to keep track of all the databases available
             // each database needs it's own CoreState

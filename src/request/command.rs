@@ -12,6 +12,7 @@ pub enum Command {
     Incr(Key, Option<Number>),
     Decr(Key, Option<Number>),
     Select(String),
+    Keys,
     Info,
     FlushAll,
 }
@@ -99,6 +100,7 @@ impl Command {
                             Err("Not enough args".into())
                         }
                     }
+                    "keys" => Ok(Command::Keys),
                     "info" => Ok(Command::Info),
                     "select" => {
                         if let Some(arg0) = Self::string_arg(data.next()) {
