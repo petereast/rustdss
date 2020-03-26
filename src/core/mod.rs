@@ -5,6 +5,8 @@ use std::sync::mpsc::{sync_channel, SyncSender};
 use std::thread;
 
 mod base_logic;
+mod key_val;
+mod number;
 
 pub type DatabaseId = String;
 

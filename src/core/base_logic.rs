@@ -1,53 +1,22 @@
 use super::{Command, CoreState};
 use crate::transport::RespData;
 
+use super::key_val;
+use super::number;
+
+fn flushall(state: &mut CoreState) -> RespData {
+    state.keyval.clear();
+    RespData::ok()
+}
+
+// Maybe move this mapping function into the module root?
 pub fn core_logic(state: &mut CoreState, cmd: Command) -> RespData {
     let response = match cmd {
-        Command::Set(key, value) => {
-            state.keyval.insert(key, value);
-            RespData::ok()
-        }
-        Command::Get(key) => state
-            .keyval
-            .get(&key)
-            .unwrap_or(&RespData::Error("(nil)".into()))
-            .clone(),
-        Command::FlushAll => {
-            state.keyval.clear();
-            RespData::ok()
-        }
-        Command::Incr(key, maybe_by) => {
-            let prev = state.keyval.get(&key);
-
-            let op = match prev {
-                Some(RespData::Number(val)) => Ok(RespData::Number(val + maybe_by.unwrap_or(1))),
-                Some(_) => Err(RespData::Error("NaN".into())),
-                None => Ok(RespData::Number(1)),
-            };
-
-            if let Ok(new_val) = op {
-                state.keyval.insert(key, new_val.clone());
-                new_val
-            } else {
-                op.err().unwrap()
-            }
-        }
-        Command::Decr(key, maybe_by) => {
-            let prev = state.keyval.get(&key);
-
-            let op = match prev {
-                Some(RespData::Number(val)) => Ok(RespData::Number(val - maybe_by.unwrap_or(1))),
-                Some(_) => Err(RespData::Error("NaN".into())),
-                None => Ok(RespData::Number(-1)),
-            };
-
-            if let Ok(new_val) = op {
-                state.keyval.insert(key, new_val.clone());
-                new_val
-            } else {
-                op.err().unwrap()
-            }
-        }
+        Command::Set(key, value) => key_val::set(state, key, value),
+        Command::Get(key) => key_val::get(state, key),
+        Command::FlushAll => flushall(state),
+        Command::Incr(key, maybe_by) => number::incr(state, key, maybe_by),
+        Command::Decr(key, maybe_by) => number::decr(state, key, maybe_by),
         _ => RespData::Error("Unknown core cmd".into()),
     };
     response
