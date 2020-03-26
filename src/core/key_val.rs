@@ -1,5 +1,6 @@
 use super::CoreState;
 use crate::transport::RespData;
+
 pub fn set(state: &mut CoreState, key: String, value: RespData) -> RespData {
     state.keyval.insert(key, value);
     RespData::ok()

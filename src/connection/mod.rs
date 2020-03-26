@@ -19,12 +19,18 @@ impl Connection {
             .bytes()
             .map(|result| result.unwrap() as char);
 
+        let mut database_id = None;
         loop {
             if let Some(input_data) = RespData::from_char_stream(&mut bytes) {
                 // Parse each request and give the parsed request to the Request module
                 // Turn the bytes into a stream of chars!
                 //
-                let response = Request::handle(core_sender.clone(), input_data);
+                // We need some state here to manage which database this connection/session is
+                // talking to
+                let (new_database_id, response) =
+                    Request::handle(database_id.clone(), core_sender.clone(), input_data);
+
+                database_id = new_database_id;
 
                 stream
                     .write(response.as_string().as_bytes())
@@ -38,7 +44,7 @@ impl Connection {
     pub fn start(outer_core_sender: SyncSender<Message>) -> std::io::Result<Self> {
         println!("[connection] Starting to listen to connections");
 
-        let listener = TcpListener::bind("0.0.0.0:6379")?;
+        let listener = TcpListener::bind("0.0.0.0:6380")?;
 
         for stream in listener.incoming() {
             let core_sender = outer_core_sender.clone();
