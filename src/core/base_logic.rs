@@ -1,25 +1,21 @@
 use super::{Command, CoreState};
 use crate::transport::RespData;
 
+use super::admin;
 use super::key_val;
 use super::number;
 
-fn flushall(state: &mut CoreState) -> RespData {
-    state.keyval.clear();
-    RespData::ok()
-}
-
 // Maybe move this mapping function into the module root?
 pub fn core_logic(state: &mut CoreState, cmd: Command) -> RespData {
-    let response = match cmd {
+    match cmd {
         Command::Set(key, value) => key_val::set(state, key, value),
         Command::Get(key) => key_val::get(state, key),
-        Command::FlushAll => flushall(state),
         Command::Incr(key, maybe_by) => number::incr(state, key, maybe_by),
         Command::Decr(key, maybe_by) => number::decr(state, key, maybe_by),
+        Command::Keys => admin::keys(state),
+        Command::FlushAll => admin::flushall(state),
         _ => RespData::Error("Unknown core cmd".into()),
-    };
-    response
+    }
 }
 #[cfg(test)]
 mod should {
