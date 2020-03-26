@@ -8,11 +8,16 @@ pub enum RespData {
     SimpleStr(String),   // Simple strings are not prefixed with length
     BulkStr(String),     // BulkStr is prefixed with it's length
     List(Vec<RespData>), // Lists don't have to be made up of the same type
+    NullString,
 }
 
 impl RespData {
     pub fn ok() -> Self {
         Self::SimpleStr("OK".into())
+    }
+
+    pub fn nil() -> Self {
+        Self::SimpleStr("(nil)".into())
     }
 }
 

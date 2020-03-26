@@ -72,7 +72,7 @@ mod should {
 
         let response = core_logic(&mut state, Command::Get("a".into()));
 
-        assert_eq!(response, RespData::Error("(nil)".into()));
+        assert_eq!(response, RespData::NullString);
         assert_eq!(state.keyval.len(), 0);
         assert_eq!(state.keyval.get("a"), None);
     }
