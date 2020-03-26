@@ -4,7 +4,7 @@
 use super::{CoreState, Key};
 use crate::transport::RespData;
 
-fn lpush(state: &mut CoreState, key: &Key, data: RespData) -> RespData {
+pub fn lpush(state: &mut CoreState, key: &Key, data: RespData) -> RespData {
     match state.keyval.get_mut(key) {
         Some(RespData::List(list)) => {
             list.push_front(data);
@@ -21,7 +21,7 @@ fn lpush(state: &mut CoreState, key: &Key, data: RespData) -> RespData {
     }
 }
 
-fn lpop(state: &mut CoreState, key: &Key) -> RespData {
+pub fn lpop(state: &mut CoreState, key: &Key) -> RespData {
     match state.keyval.get_mut(key) {
         Some(RespData::List(list)) => list.pop_front().unwrap_or(RespData::nil()),
         Some(_) => RespData::wrong_type(),
@@ -29,7 +29,7 @@ fn lpop(state: &mut CoreState, key: &Key) -> RespData {
     }
 }
 
-fn rpush(state: &mut CoreState, key: &Key, data: RespData) -> RespData {
+pub fn rpush(state: &mut CoreState, key: &Key, data: RespData) -> RespData {
     match state.keyval.get_mut(key) {
         Some(RespData::List(list)) => {
             list.push_back(data);
@@ -46,7 +46,7 @@ fn rpush(state: &mut CoreState, key: &Key, data: RespData) -> RespData {
     }
 }
 
-fn rpop(state: &mut CoreState, key: &Key) -> RespData {
+pub fn rpop(state: &mut CoreState, key: &Key) -> RespData {
     match state.keyval.get_mut(key) {
         Some(RespData::List(list)) => list.pop_back().unwrap_or(RespData::nil()),
         Some(_) => RespData::wrong_type(),
