@@ -12,6 +12,10 @@ pub enum Command {
     Incr(Key, Option<Number>),
     Decr(Key, Option<Number>),
     Select(String),
+    Lpop(Key),
+    Lpush(Key, RespData),
+    Rpop(Key),
+    Rpush(Key, RespData),
     Keys,
     Info,
     FlushAll,
@@ -96,6 +100,38 @@ impl Command {
                     "incrby" => {
                         if let Some(arg0) = Self::string_arg(data.next()) {
                             Ok(Command::Incr(arg0, Self::numerical_arg(data.next())))
+                        } else {
+                            Err("Not enough args".into())
+                        }
+                    }
+                    "lpush" => {
+                        if let (Some(arg0), Some(arg1)) =
+                            (Self::string_arg(data.next()), data.next())
+                        {
+                            Ok(Command::Lpush(arg0, arg1))
+                        } else {
+                            Err("Not enough args".into())
+                        }
+                    }
+                    "rpush" => {
+                        if let (Some(arg0), Some(arg1)) =
+                            (Self::string_arg(data.next()), data.next())
+                        {
+                            Ok(Command::Rpush(arg0, arg1))
+                        } else {
+                            Err("Not enough args".into())
+                        }
+                    }
+                    "lpop" => {
+                        if let Some(arg0) = Self::string_arg(data.next()) {
+                            Ok(Command::Lpop(arg0))
+                        } else {
+                            Err("Not enough args".into())
+                        }
+                    }
+                    "rpop" => {
+                        if let Some(arg0) = Self::string_arg(data.next()) {
+                            Ok(Command::Rpop(arg0))
                         } else {
                             Err("Not enough args".into())
                         }
