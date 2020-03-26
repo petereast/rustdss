@@ -22,14 +22,21 @@ The client request should parse into:
 use super::RespData;
 
 impl RespData {
-    fn parse_bulk_string<A>(stream: &mut A) -> Self
+    fn parse_bulk_string<A>(first_chunk: String, stream: &mut A) -> Self
     where
         A: Iterator<Item = char>,
     {
         // A bulk string is made up of two chunks: the first is an int indicating how long the
         // string is, and the second is the string it's self
-        if let Some(second_chunk) = Self::parse_chunk(stream) {
-            Self::BulkStr(second_chunk.into())
+
+        if let (Ok(len), Some(second_chunk)) =
+            (first_chunk.parse::<i64>(), Self::parse_chunk(stream))
+        {
+            if len == -1 {
+                Self::NullString
+            } else {
+                Self::BulkStr(second_chunk.into())
+            }
         } else {
             Self::Error("Can't process bulk string".into())
         }
@@ -93,7 +100,7 @@ impl RespData {
                 // Uses more than one chunk - Will need to lend the stream to the parser
                 // function
                 // Doesn't need the current chunk, the next one will contain the entire string
-                Self::parse_bulk_string(value)
+                Self::parse_bulk_string(chunk.split_off(1), value)
             }
             Some("*") => {
                 // Uses more than one chunk - Will need to lend the stream to the parser

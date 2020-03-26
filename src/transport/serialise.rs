@@ -18,6 +18,7 @@ impl RespData {
             RespData::BulkStr(string) => format!("${}\r\n{}\r\n", string.len(), *string),
             RespData::Error(err_text) => format!("-{}\r\n", *err_text),
             RespData::List(items) => Self::serialise_list(items),
+            RespData::NullString => "$-1\r\n".into(),
         }
     }
 

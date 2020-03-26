@@ -10,6 +10,6 @@ pub fn get(state: &CoreState, key: String) -> RespData {
     state
         .keyval
         .get(&key)
-        .unwrap_or(&RespData::Error("(nil)".into()))
+        .unwrap_or(&RespData::NullString)
         .clone()
 }
