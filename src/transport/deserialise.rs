@@ -29,14 +29,10 @@ impl RespData {
         // A bulk string is made up of two chunks: the first is an int indicating how long the
         // string is, and the second is the string it's self
 
-        if let (Ok(len), Some(second_chunk)) =
-            (first_chunk.parse::<i64>(), Self::parse_chunk(stream))
-        {
-            if len == -1 {
-                Self::NullString
-            } else {
-                Self::BulkStr(second_chunk.into())
-            }
+        if first_chunk.parse::<i64>() == Ok(-1) {
+            Self::NullString
+        } else if let Some(second_chunk) = Self::parse_chunk(stream) {
+            Self::BulkStr(second_chunk.into())
         } else {
             Self::Error("Can't process bulk string".into())
         }
@@ -250,6 +246,15 @@ mod should {
             Some(RespData::Error(
                 "Unknown symbol or unexpected end of stream".into()
             )),
+        );
+    }
+
+    #[test]
+    fn parse_nil_strings() {
+        let mut test_input = "$-1\r\n".chars();
+        assert_eq!(
+            RespData::from_char_stream(&mut test_input),
+            Some(RespData::NullString),
         );
     }
 
