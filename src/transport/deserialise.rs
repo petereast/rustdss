@@ -20,6 +20,7 @@ The client request should parse into:
 */
 
 use super::RespData;
+use std::collections::VecDeque;
 
 impl RespData {
     fn parse_bulk_string<A>(first_chunk: String, stream: &mut A) -> Self
@@ -103,7 +104,7 @@ impl RespData {
                 match chunk.split_off(1).parse::<usize>() {
                     Ok(i) => {
                         // Read the following number of VALUES, not chunks!!
-                        let vals: Vec<Self> = (0..i)
+                        let vals: VecDeque<Self> = (0..i)
                             .into_iter()
                             .map(|_| {
                                 // Read the next value from the stream
@@ -215,20 +216,32 @@ mod should {
     }
     #[test]
     fn parse_multi_dimensional_lists() {
-        let expected_output = RespData::List(vec![
-            RespData::List(vec![
-                RespData::SimpleStr("aaa".into()),
-                RespData::SimpleStr("bbb".into()),
-            ]),
-            RespData::List(vec![
-                RespData::SimpleStr("ccc".into()),
-                RespData::SimpleStr("ddd".into()),
-            ]),
-            RespData::List(vec![
-                RespData::SimpleStr("eee".into()),
-                RespData::SimpleStr("fff".into()),
-            ]),
-        ]);
+        let expected_output = RespData::List(
+            vec![
+                RespData::List(
+                    vec![
+                        RespData::SimpleStr("aaa".into()),
+                        RespData::SimpleStr("bbb".into()),
+                    ]
+                    .into(),
+                ),
+                RespData::List(
+                    vec![
+                        RespData::SimpleStr("ccc".into()),
+                        RespData::SimpleStr("ddd".into()),
+                    ]
+                    .into(),
+                ),
+                RespData::List(
+                    vec![
+                        RespData::SimpleStr("eee".into()),
+                        RespData::SimpleStr("fff".into()),
+                    ]
+                    .into(),
+                ),
+            ]
+            .into(),
+        );
         let mut input =
             "*3\r\n*2\r\n+aaa\r\n+bbb\r\n*2\r\n+ccc\r\n+ddd\r\n*2\r\n+eee\r\n+fff\r\n".chars();
 

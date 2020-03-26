@@ -3,6 +3,7 @@ use crate::transport::RespData;
 
 use super::admin;
 use super::key_val;
+use super::lists;
 use super::number;
 
 // Maybe move this mapping function into the module root?
