@@ -26,9 +26,9 @@ redis-benchmark -t set,get,ping -r 10000 -n 1000000
   - Start serialising lists
     - as a stream (this should result in a big performance increase)
   - handle different data types in the backing store
-    - starting with list operations
-    - Then sets
-    - Then maps
+    - [x] starting with list operations
+    - [ ] Then sets
+    - [ ] Then maps
 - Refactor the `core` module into a separate crate, so it can be embedded.
 - Increase underlying datastructure performance
   - Use a radix tree to support lower O operations.
