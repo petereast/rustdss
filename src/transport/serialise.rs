@@ -1,8 +1,8 @@
 // Provide an implementation of a serde serialiser for RESP data
 use super::RespData;
-
+use std::collections::VecDeque;
 impl RespData {
-    fn serialise_list(items: &Vec<RespData>) -> String {
+    fn serialise_list(items: &VecDeque<RespData>) -> String {
         // NOTE: This is a naieve and probably rubbish way of serialising lists, could probably be
         // optimised at some point
         let len = items.len();
@@ -63,12 +63,15 @@ mod should {
 
     #[test]
     fn serialise_simple_lists_properly() {
-        let input = RespData::List(vec![
-            RespData::SimpleStr("hello".into()),
-            RespData::Number(100),
-            RespData::Error("error".into()),
-            RespData::BulkStr("hello world!".into()),
-        ]);
+        let input = RespData::List(
+            vec![
+                RespData::SimpleStr("hello".into()),
+                RespData::Number(100),
+                RespData::Error("error".into()),
+                RespData::BulkStr("hello world!".into()),
+            ]
+            .into(),
+        );
 
         assert_eq!(
             input.as_string(),
@@ -78,20 +81,32 @@ mod should {
 
     #[test]
     fn serialise_multi_dimensional_lists_properly() {
-        let input = RespData::List(vec![
-            RespData::List(vec![
-                RespData::SimpleStr("aaa".into()),
-                RespData::SimpleStr("bbb".into()),
-            ]),
-            RespData::List(vec![
-                RespData::SimpleStr("ccc".into()),
-                RespData::SimpleStr("ddd".into()),
-            ]),
-            RespData::List(vec![
-                RespData::SimpleStr("eee".into()),
-                RespData::SimpleStr("fff".into()),
-            ]),
-        ]);
+        let input = RespData::List(
+            vec![
+                RespData::List(
+                    vec![
+                        RespData::SimpleStr("aaa".into()),
+                        RespData::SimpleStr("bbb".into()),
+                    ]
+                    .into(),
+                ),
+                RespData::List(
+                    vec![
+                        RespData::SimpleStr("ccc".into()),
+                        RespData::SimpleStr("ddd".into()),
+                    ]
+                    .into(),
+                ),
+                RespData::List(
+                    vec![
+                        RespData::SimpleStr("eee".into()),
+                        RespData::SimpleStr("fff".into()),
+                    ]
+                    .into(),
+                ),
+            ]
+            .into(),
+        );
 
         assert_eq!(
             input.as_string(),

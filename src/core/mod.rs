@@ -7,6 +7,7 @@ use std::thread;
 mod admin;
 mod base_logic;
 mod key_val;
+mod lists;
 mod number;
 
 pub type DatabaseId = String;
