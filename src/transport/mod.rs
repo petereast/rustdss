@@ -30,7 +30,6 @@ impl RespData {
 mod should {
     // These are end-to-end tests
     // Showing that it can decode and re-encode data into the same thing.
-    use super::*;
 
     #[test]
     fn run_tests() {

@@ -208,10 +208,13 @@ mod should {
         let mut test1 = "*2\r\n$4\r\nllen\r\n$6\r\nmylist\r\n".chars();
         assert_eq!(
             RespData::from_char_stream(&mut test1),
-            Some(RespData::List(vec![
-                RespData::BulkStr("llen".into()),
-                RespData::BulkStr("mylist".into()),
-            ])),
+            Some(RespData::List(
+                vec![
+                    RespData::BulkStr("llen".into()),
+                    RespData::BulkStr("mylist".into()),
+                ]
+                .into()
+            )),
         )
     }
     #[test]
