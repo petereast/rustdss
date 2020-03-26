@@ -17,7 +17,7 @@ impl RespData {
     }
 
     pub fn nil() -> Self {
-        Self::SimpleStr("(nil)".into())
+        Self::NullString
     }
 }
 

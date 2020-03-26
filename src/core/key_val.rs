@@ -7,9 +7,5 @@ pub fn set(state: &mut CoreState, key: String, value: RespData) -> RespData {
 }
 
 pub fn get(state: &CoreState, key: String) -> RespData {
-    state
-        .keyval
-        .get(&key)
-        .unwrap_or(&RespData::NullString)
-        .clone()
+    state.keyval.get(&key).unwrap_or(&RespData::nil()).clone()
 }
