@@ -11,6 +11,7 @@ pub enum Command {
     Set(Key, RespData),
     Incr(Key, Option<Number>),
     Decr(Key, Option<Number>),
+    Select(String),
     Info,
     FlushAll,
 }
@@ -99,6 +100,13 @@ impl Command {
                         }
                     }
                     "info" => Ok(Command::Info),
+                    "select" => {
+                        if let Some(arg0) = Self::string_arg(data.next()) {
+                            Ok(Command::Select(arg0))
+                        } else {
+                            Err("too few args".into())
+                        }
+                    }
                     _ => Err("unknown command".into()),
                 }
             } else {
