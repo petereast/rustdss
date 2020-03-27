@@ -19,6 +19,7 @@ pub enum Command {
     Keys,
     Info,
     FlushAll,
+    Dump(Key),
 }
 
 impl Command {
@@ -136,6 +137,14 @@ impl Command {
                             Err("Not enough args".into())
                         }
                     }
+                    "dump" => {
+                        if let Some(arg0) = Self::string_arg(data.next()) {
+                            Ok(Command::Dump(arg0))
+                        } else {
+                            Err("Not enough args".into())
+                        }
+                    }
+
                     "keys" => Ok(Command::Keys),
                     "info" => Ok(Command::Info),
                     "select" => {

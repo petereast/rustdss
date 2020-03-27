@@ -15,3 +15,11 @@ pub fn keys(state: &CoreState) -> RespData {
             .collect(),
     )
 }
+
+pub fn dump(state: &CoreState, key: &String) -> RespData {
+    state
+        .keyval
+        .get(key)
+        .map(|value| RespData::BulkStr(value.as_string()))
+        .unwrap_or(RespData::nil())
+}

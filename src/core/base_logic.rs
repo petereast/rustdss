@@ -19,6 +19,7 @@ pub fn core_logic(state: &mut CoreState, cmd: Command) -> RespData {
         Command::Rpush(key, value) => lists::rpush(state, &key, value),
         Command::Keys => admin::keys(state),
         Command::FlushAll => admin::flushall(state),
+        Command::Dump(key) => admin::dump(state, &key),
         _ => RespData::Error("Unknown core cmd".into()),
     }
 }
