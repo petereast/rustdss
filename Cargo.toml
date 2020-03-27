@@ -2,5 +2,6 @@
 members = [
   "rustdss_server",
   "rustdss_transport",
-  "rustdss_core"
+  "rustdss_core",
+  "rustdss_data"
 ]

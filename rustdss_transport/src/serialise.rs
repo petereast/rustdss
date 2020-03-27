@@ -1,30 +1,31 @@
 // Provide an implementation of a serde serialiser for RESP data
-use super::RespData;
+use rustdss_data::RespData;
 use std::collections::VecDeque;
-impl RespData {
-    fn serialise_list(items: &VecDeque<RespData>) -> String {
-        // NOTE: This is a naieve and probably rubbish way of serialising lists, could probably be
-        // optimised at some point
-        let len = items.len();
 
-        let content: String = items.into_iter().map(|item| item.as_string()).collect();
+pub trait SerialiseRespData {
+    fn as_string(&self) -> String;
+}
 
-        format!("*{}\r\n{}", len, content)
-    }
-    pub fn as_string(&self) -> String {
+fn serialise_list(items: &VecDeque<RespData>) -> String {
+    // NOTE: This is a naieve and probably rubbish way of serialising lists, could probably be
+    // optimised at some point
+    let len = items.len();
+
+    let content: String = items.into_iter().map(|item| item.as_string()).collect();
+
+    format!("*{}\r\n{}", len, content)
+}
+
+impl SerialiseRespData for RespData {
+    fn as_string(&self) -> String {
         match self {
             RespData::SimpleStr(data) => format!("+{}\r\n", *data),
             RespData::Number(num) => format!(":{}\r\n", *num),
             RespData::BulkStr(string) => format!("${}\r\n{}\r\n", string.len(), *string),
             RespData::Error(err_text) => format!("-{}\r\n", *err_text),
-            RespData::List(items) => Self::serialise_list(items),
+            RespData::List(items) => serialise_list(items),
             RespData::NullString => "$-1\r\n".into(),
         }
-    }
-
-    pub fn _bytes(&self) -> std::str::Bytes {
-        // This returns a stream of serialised text
-        unimplemented!();
     }
 }
 

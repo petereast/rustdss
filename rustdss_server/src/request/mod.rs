@@ -1,9 +1,10 @@
 pub mod command;
 
-use crate::core::Message;
-use command::Command;
+use command::ParseCommand;
+use rustdss_core::Message;
+use rustdss_data::Command;
+use rustdss_data::RespData;
 use std::sync::mpsc::{sync_channel, SyncSender};
-use transport::RespData;
 
 pub struct Request {}
 
