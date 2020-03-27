@@ -5,4 +5,6 @@ authors = ["Peter East <peter@repositive.io>"]
 edition = "2018"
 
 [dependencies]
-transport = {path = "../rustdss_transport"}
+rustdss_transport = {path = "../rustdss_transport"}
+rustdss_core = {path = "../rustdss_core"}
+rustdss_data = {path = "../rustdss_data"}

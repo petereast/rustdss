@@ -19,51 +19,15 @@ The client request should parse into:
 
 */
 
-use super::RespData;
+use rustdss_data::RespData;
 use std::collections::VecDeque;
 
-impl RespData {
-    fn parse_bulk_string<A>(first_chunk: String, stream: &mut A) -> Self
-    where
-        A: Iterator<Item = char>,
-    {
-        // A bulk string is made up of two chunks: the first is an int indicating how long the
-        // string is, and the second is the string it's self
+pub trait DeserialiseRespData {
+    fn from_char_stream<A: Iterator<Item = char>>(value: &mut A) -> Option<RespData>;
+}
 
-        if first_chunk.parse::<i64>() == Ok(-1) {
-            Self::NullString
-        } else if let Some(second_chunk) = Self::parse_chunk(stream) {
-            Self::BulkStr(second_chunk.into())
-        } else {
-            Self::Error("Can't process bulk string".into())
-        }
-    }
-
-    /// Just return the string until it reaches \r\n
-    fn parse_chunk<A>(stream: &mut A) -> Option<String>
-    where
-        A: Iterator<Item = char>,
-    {
-        if let Some(first) = stream.next() {
-            let output: String = stream
-                .scan(first, |state, item| {
-                    if item == '\n' && *state == '\r' {
-                        None
-                    } else {
-                        *state = item;
-                        Some(item)
-                    }
-                })
-                .collect();
-
-            // There must be a better way of doing this!
-            Some(String::from(format!("{}{}", first, output).trim()))
-        } else {
-            None
-        }
-    }
-
-    pub fn from_char_stream<A>(value: &mut A) -> Option<Self>
+impl DeserialiseRespData for RespData {
+    fn from_char_stream<A>(value: &mut A) -> Option<Self>
     where
         A: Iterator<Item = char>,
     {
@@ -75,7 +39,7 @@ impl RespData {
         // - Streamed away - the resulting RESP data should be made available as a stream (or
         //   iterator? Not sure which one is better for this purpose?)
         //  - Maybe don't return a stream and also don't consume the stream?
-        let mut chunk = Self::parse_chunk(value)?;
+        let mut chunk = parse_chunk(value)?;
         Some(match chunk.get(0..1) {
             Some(":") => {
                 // good
@@ -97,7 +61,7 @@ impl RespData {
                 // Uses more than one chunk - Will need to lend the stream to the parser
                 // function
                 // Doesn't need the current chunk, the next one will contain the entire string
-                Self::parse_bulk_string(chunk.split_off(1), value)
+                parse_bulk_string(chunk.split_off(1), value)
             }
             Some("*") => {
                 // Uses more than one chunk - Will need to lend the stream to the parser
@@ -125,6 +89,45 @@ impl RespData {
                 Self::Error("Unknown symbol or unexpected end of stream".into())
             }
         })
+    }
+}
+fn parse_bulk_string<A>(first_chunk: String, stream: &mut A) -> RespData
+where
+    A: Iterator<Item = char>,
+{
+    // A bulk string is made up of two chunks: the first is an int indicating how long the
+    // string is, and the second is the string it's self
+
+    if first_chunk.parse::<i64>() == Ok(-1) {
+        RespData::NullString
+    } else if let Some(second_chunk) = parse_chunk(stream) {
+        RespData::BulkStr(second_chunk.into())
+    } else {
+        RespData::Error("Can't process bulk string".into())
+    }
+}
+
+/// Just return the string until it reaches \r\n
+fn parse_chunk<A>(stream: &mut A) -> Option<String>
+where
+    A: Iterator<Item = char>,
+{
+    if let Some(first) = stream.next() {
+        let output: String = stream
+            .scan(first, |state, item| {
+                if item == '\n' && *state == '\r' {
+                    None
+                } else {
+                    *state = item;
+                    Some(item)
+                }
+            })
+            .collect();
+
+        // There must be a better way of doing this!
+        Some(String::from(format!("{}{}", first, output).trim()))
+    } else {
+        None
     }
 }
 

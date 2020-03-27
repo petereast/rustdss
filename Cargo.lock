@@ -4,14 +4,27 @@
 name = "rustdss"
 version = "0.1.0"
 dependencies = [
- "transport 0.1.0",
+ "rustdss_core 0.1.0",
+ "rustdss_data 0.1.0",
+ "rustdss_transport 0.1.0",
 ]
 
 [[package]]
 name = "rustdss_core"
 version = "0.1.0"
+dependencies = [
+ "rustdss_data 0.1.0",
+ "rustdss_transport 0.1.0",
+]
 
 [[package]]
-name = "transport"
+name = "rustdss_data"
 version = "0.1.0"
+
+[[package]]
+name = "rustdss_transport"
+version = "0.1.0"
+dependencies = [
+ "rustdss_data 0.1.0",
+]
 
