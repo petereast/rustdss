@@ -4,11 +4,8 @@ use std::sync::mpsc::{sync_channel, SyncSender};
 use std::thread;
 use transport::RespData;
 
-mod admin;
 mod base_logic;
-mod key_val;
-mod lists;
-mod number;
+mod db_logic;
 
 pub type DatabaseId = String;
 
