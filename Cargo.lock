@@ -8,6 +8,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "rustdss_core"
+version = "0.1.0"
+
+[[package]]
 name = "transport"
 version = "0.1.0"
 
