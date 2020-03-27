@@ -1,10 +1,10 @@
 use super::{Command, CoreState};
 use transport::RespData;
 
-use super::admin;
-use super::key_val;
-use super::lists;
-use super::number;
+use crate::db_logic::admin;
+use crate::db_logic::key_val;
+use crate::db_logic::lists;
+use crate::db_logic::number;
 
 // Maybe move this mapping function into the module root?
 pub fn core_logic(state: &mut CoreState, cmd: Command) -> RespData {
