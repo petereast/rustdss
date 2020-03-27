@@ -3,3 +3,8 @@
 [[package]]
 name = "rustdss"
 version = "0.1.0"
+
+[[package]]
+name = "transport"
+version = "0.1.0"
+
