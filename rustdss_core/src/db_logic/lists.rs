@@ -56,7 +56,7 @@ pub fn rpop(state: &mut CoreState, key: &Key) -> RespData {
 #[cfg(test)]
 mod lpush_should {
     use super::*;
-    use crate::core::CoreState;
+    use crate::CoreState;
     use std::collections::HashMap;
 
     #[test]
@@ -140,7 +140,7 @@ mod lpush_should {
 #[cfg(test)]
 mod rpush_should {
     use super::*;
-    use crate::core::CoreState;
+    use crate::CoreState;
     use std::collections::HashMap;
 
     #[test]
@@ -224,7 +224,7 @@ mod rpush_should {
 #[cfg(test)]
 mod rpop_should {
     use super::*;
-    use crate::core::CoreState;
+    use crate::CoreState;
     use std::collections::HashMap;
 
     #[test]
@@ -309,7 +309,7 @@ mod rpop_should {
 #[cfg(test)]
 mod lpop_should {
     use super::*;
-    use crate::core::CoreState;
+    use crate::CoreState;
     use std::collections::HashMap;
 
     #[test]
