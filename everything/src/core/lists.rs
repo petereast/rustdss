@@ -2,7 +2,7 @@
 // Commands: LPUSH, RPUSH, LPOP, RPOP, RPOPLPUSH
 
 use super::{CoreState, Key};
-use crate::transport::RespData;
+use transport::RespData;
 
 pub fn lpush(state: &mut CoreState, key: &Key, data: RespData) -> RespData {
     match state.keyval.get_mut(key) {

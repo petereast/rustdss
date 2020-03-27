@@ -1,5 +1,5 @@
 use super::CoreState;
-use crate::transport::RespData;
+use transport::RespData;
 
 pub fn flushall(state: &mut CoreState) -> RespData {
     state.keyval.clear();

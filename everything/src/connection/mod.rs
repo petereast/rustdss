@@ -1,10 +1,10 @@
 use crate::core::Message;
 use crate::request::Request;
-use crate::transport::RespData;
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::sync::mpsc::SyncSender;
 use std::thread;
+use transport::RespData;
 
 pub struct Connection {}
 
