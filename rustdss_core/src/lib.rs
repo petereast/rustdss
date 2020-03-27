@@ -1,8 +1,7 @@
-use crate::request::command::{Command, Key};
+use rustdss_data::{Command, Key, RespData};
 use std::collections::HashMap;
 use std::sync::mpsc::{sync_channel, SyncSender};
 use std::thread;
-use transport::RespData;
 
 mod base_logic;
 mod db_logic;
@@ -55,10 +54,7 @@ impl Core {
             let mut databases: HashMap<DatabaseId, SyncSender<(Command, SyncSender<RespData>)>> =
                 HashMap::new();
 
-            databases.insert(
-                crate::constants::default_database_name(),
-                Self::create_database(crate::constants::default_database_name()),
-            );
+            databases.insert("default".into(), Self::create_database("default".into()));
 
             loop {
                 if let Ok(msg) = reciever.recv() {

@@ -1,8 +1,8 @@
 // This will provide list support - eventually support blocking commands?
 // Commands: LPUSH, RPUSH, LPOP, RPOP, RPOPLPUSH
 
-use super::{CoreState, Key};
-use transport::RespData;
+use crate::CoreState;
+use rustdss_data::{Key, RespData};
 
 pub fn lpush(state: &mut CoreState, key: &Key, data: RespData) -> RespData {
     match state.keyval.get_mut(key) {
