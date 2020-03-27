@@ -1,5 +1,5 @@
-use super::CoreState;
-use transport::RespData;
+use crate::CoreState;
+use rustdss_data::RespData;
 
 pub fn set(state: &mut CoreState, key: String, value: RespData) -> RespData {
     state.keyval.insert(key, value);

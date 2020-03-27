@@ -1,5 +1,5 @@
-use super::{Command, CoreState};
-use transport::RespData;
+use super::CoreState;
+use rustdss_data::{Command, RespData};
 
 use crate::db_logic::admin;
 use crate::db_logic::key_val;

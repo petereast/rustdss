@@ -1,5 +1,5 @@
-use super::CoreState;
-use transport::RespData;
+use crate::CoreState;
+use rustdss_data::RespData;
 
 pub fn incr(state: &mut CoreState, key: String, maybe_by: Option<i64>) -> RespData {
     let prev = state.keyval.get(&key);
