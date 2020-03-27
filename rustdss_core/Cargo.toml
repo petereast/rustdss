@@ -1,5 +1,5 @@
 [package]
-name = "transport"
+name = "rustdss_core"
 version = "0.1.0"
 authors = ["Peter East <petereast+gpg@pm.me>"]
 edition = "2018"

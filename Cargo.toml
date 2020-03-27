@@ -1,5 +1,6 @@
 [workspace]
 members = [
-  "everything",
-  "transport"
+  "rustdss_server",
+  "rustdss_transport",
+  "rustdss_core"
 ]
