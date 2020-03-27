@@ -1,9 +1,9 @@
 pub mod command;
 
 use crate::core::Message;
-use crate::transport::RespData;
 use command::Command;
 use std::sync::mpsc::{sync_channel, SyncSender};
+use transport::RespData;
 
 pub struct Request {}
 

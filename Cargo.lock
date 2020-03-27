@@ -3,6 +3,9 @@
 [[package]]
 name = "rustdss"
 version = "0.1.0"
+dependencies = [
+ "transport 0.1.0",
+]
 
 [[package]]
 name = "transport"

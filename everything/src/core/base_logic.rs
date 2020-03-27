@@ -1,5 +1,5 @@
 use super::{Command, CoreState};
-use crate::transport::RespData;
+use transport::RespData;
 
 use super::admin;
 use super::key_val;

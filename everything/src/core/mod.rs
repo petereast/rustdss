@@ -1,8 +1,8 @@
 use crate::request::command::{Command, Key};
-use crate::transport::RespData;
 use std::collections::HashMap;
 use std::sync::mpsc::{sync_channel, SyncSender};
 use std::thread;
+use transport::RespData;
 
 mod admin;
 mod base_logic;
