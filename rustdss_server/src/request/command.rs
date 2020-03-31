@@ -26,8 +26,6 @@ fn numerical_arg(data: Option<RespData>) -> Option<i64> {
 }
 
 impl ParseCommand for Command {
-    // Utility functions
-
     fn from_resp(input: RespData) -> Result<Self, String> {
         if let RespData::List(data) = input {
             let mut data = data.into_iter();
