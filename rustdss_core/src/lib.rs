@@ -1,6 +1,6 @@
 use rustdss_data::{Command, Key, RespData};
 use std::collections::HashMap;
-use std::sync::mpsc::{sync_channel, SyncSender};
+use std::sync::mpsc::{channel, Sender};
 use std::thread;
 
 mod base_logic;
@@ -8,10 +8,10 @@ mod db_logic;
 
 pub type DatabaseId = String;
 
-pub type Message = (DatabaseId, Command, SyncSender<RespData>);
+pub type Message = (DatabaseId, Command, Sender<RespData>);
 // This is the stateful part of the application
 pub struct Core {
-    sender: SyncSender<Message>,
+    sender: Sender<Message>,
 }
 
 pub struct CoreState {
@@ -19,8 +19,8 @@ pub struct CoreState {
 }
 
 impl Core {
-    fn create_database(db_id: String) -> SyncSender<(Command, SyncSender<RespData>)> {
-        let (db_sender, db_reciever) = sync_channel::<(Command, SyncSender<RespData>)>(50);
+    fn create_database(db_id: String) -> Sender<(Command, Sender<RespData>)> {
+        let (db_sender, db_reciever) = channel::<(Command, Sender<RespData>)>();
 
         thread::spawn(move || {
             let mut db_state = CoreState {
@@ -45,13 +45,13 @@ impl Core {
     pub fn start() -> Self {
         // Could do something interesting using a threadpool - key-hash sharding for example
         println!("[core] starting core");
-        let (sender, reciever) = sync_channel::<Message>(50);
+        let (sender, reciever) = channel::<Message>();
 
         // Each database get's it's own thread
         thread::spawn(move || {
             // This thread needs to keep track of all the databases available
             // each database needs it's own CoreState
-            let mut databases: HashMap<DatabaseId, SyncSender<(Command, SyncSender<RespData>)>> =
+            let mut databases: HashMap<DatabaseId, Sender<(Command, Sender<RespData>)>> =
                 HashMap::new();
 
             databases.insert("default".into(), Self::create_database("default".into()));
@@ -80,7 +80,7 @@ impl Core {
         Self { sender: sender }
     }
 
-    pub fn get_sender(&self) -> SyncSender<Message> {
+    pub fn get_sender(&self) -> Sender<Message> {
         self.sender.clone()
     }
 }

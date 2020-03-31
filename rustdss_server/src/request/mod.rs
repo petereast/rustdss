@@ -4,14 +4,14 @@ use command::ParseCommand;
 use rustdss_core::Message;
 use rustdss_data::Command;
 use rustdss_data::RespData;
-use std::sync::mpsc::{sync_channel, SyncSender};
+use std::sync::mpsc::{channel, Sender};
 
 pub struct Request {}
 
 impl Request {
     pub fn handle(
         database_id: Option<String>,
-        core_sender: SyncSender<Message>,
+        core_sender: Sender<Message>,
         input: RespData,
     ) -> (Option<String>, RespData) {
         match Command::from_resp(input) {
@@ -21,9 +21,8 @@ impl Request {
             Ok(Command::Info) => (database_id, RespData::SimpleStr("info".into())),
             Ok(Command::Select(new_db)) => (Some(new_db), RespData::ok()),
             Ok(core_cmd) => {
-                // This will dispatch a request to the core -- how to deal with the response?
-                // Channels are a one way affair - maybe build a module to deal with this?
-                let (return_sender, recv) = sync_channel::<RespData>(5);
+                // How do we stream data from the responder?
+                let (return_sender, recv) = channel::<RespData>();
                 match core_sender
                     .send((
                         database_id
