@@ -4,7 +4,6 @@ use std::collections::VecDeque;
 
 pub trait SerialiseRespData {
     fn as_string(&self) -> String;
-    fn as_stream(&self) -> std::str::Bytes;
 }
 
 fn serialise_list(items: &VecDeque<RespData>) -> String {
@@ -17,11 +16,6 @@ fn serialise_list(items: &VecDeque<RespData>) -> String {
     format!("*{}\r\n{}", len, content)
 }
 
-fn stream_list(items: &VecDeque<RespData>) -> std::str::Bytes {
-    let header = format!("*{}\r\n", items.len()).bytes();
-    unimplemented!();
-}
-
 impl SerialiseRespData for RespData {
     fn as_string(&self) -> String {
         match self {
@@ -32,9 +26,6 @@ impl SerialiseRespData for RespData {
             RespData::List(items) => serialise_list(items),
             RespData::NullString => "$-1\r\n".into(),
         }
-    }
-    fn as_stream(&self) -> std::str::Bytes {
-        unimplemented!();
     }
 }
 
