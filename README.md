@@ -17,7 +17,7 @@ This uses the redis protocol, so you can test it by doing this:
 ```bash
 cargo run --release &
 
-redis-benchmark -t set,get,ping -r 10000 -n 1000000
+redis-benchmark -p 6380 -t set,get,ping -r 10000 -n 1000000
 
 ```
 
