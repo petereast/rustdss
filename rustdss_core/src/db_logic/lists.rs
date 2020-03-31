@@ -53,6 +53,17 @@ pub fn rpop(state: &mut CoreState, key: &Key) -> RespData {
         _ => RespData::nil(),
     }
 }
+
+pub fn llen(state: &CoreState, key: &Key) -> RespData {
+    state
+        .keyval
+        .get(key)
+        .and_then(|entry| match entry {
+            RespData::List(l) => Some(RespData::Number(l.len() as i64)),
+            _ => None,
+        })
+        .unwrap_or(RespData::nil())
+}
 #[cfg(test)]
 mod lpush_should {
     use super::*;
@@ -389,4 +400,38 @@ mod lpop_should {
         );
         assert_eq!(response, RespData::wrong_type());
     }
+}
+
+#[cfg(test)]
+mod llen_should {
+    use super::*;
+    use crate::CoreState;
+    use std::collections::HashMap;
+
+    #[test]
+    fn it_returns_the_length_of_a_list() {
+        let mut keyval = HashMap::new();
+
+        keyval.insert(
+            "key".into(),
+            RespData::List(
+                vec![
+                    RespData::Number(1),
+                    RespData::Number(2),
+                    RespData::Number(3),
+                    RespData::Number(4),
+                ]
+                .into(),
+            ),
+        );
+
+        let state = CoreState { keyval };
+
+        let response = llen(&state, &"key".into());
+
+        assert_eq!(response, RespData::Number(4));
+    }
+
+    #[test]
+    fn it_returns_nil_when_the_list_isnt_there() {}
 }
