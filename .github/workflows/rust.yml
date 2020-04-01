@@ -12,24 +12,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Cache cargo install
+    - name: Cache cargo tarpaulin
       id: precache
       uses: actions/cache@v1
       with:
-        path: ~/.cargo/bin
-        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('~/.cargo/bin/**') }}
+        path: ~/cbin
+        key: ${{ runner.os }}-cargo-tarpaulin
 
     - name: Install Deps
       if: steps.precache.outputs.cache-hit != 'true'
       run: |
         sudo apt -y install libssl-dev
         cargo install cargo-tarpaulin
+        mkdir ~/cbin
+        cp ~/.cargo/bin/cargo-tarpaulin ~/cbin
 
-    - name: post Cache cargo install
+    - name: post Cache cargo tarpaulin
       uses: actions/cache@v1
       with:
-        path: ~/.cargo/bin
-        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('~/.cargo/bin/**') }}
+        path: ~/cbin
+        key: ${{ runner.os }}-cargo-tarpaulin
 
     - uses: actions/checkout@v2
     - name: Build
@@ -37,5 +39,5 @@ jobs:
     - name: Run tests
       run: |
         cargo test --verbose
-        cargo tarpaulin --out Xml
+        ~/cbin/cargo-tarpaulin tarpaulin --out Xml
         bash <(curl -s https://codecov.io/bash)
