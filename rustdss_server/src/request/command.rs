@@ -121,6 +121,19 @@ impl ParseCommand for Command {
                             Err("Not enough args".into())
                         }
                     }
+                    "lrange" => {
+                        if let Some(arg0) = string_arg(data.next()) {
+                            if let (Some(arg1), Some(arg2)) =
+                                (numerical_arg(data.next()), numerical_arg(data.next()))
+                            {
+                                Ok(Command::Lrange(arg0, arg1, arg2))
+                            } else {
+                                Err("Not enough args".into())
+                            }
+                        } else {
+                            Err("Not enough args".into())
+                        }
+                    }
                     "dump" => {
                         if let Some(arg0) = string_arg(data.next()) {
                             Ok(Command::Dump(arg0))
