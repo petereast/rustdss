@@ -1,3 +1,7 @@
+[![codecov](https://codecov.io/gh/petereast/rustdss/branch/master/graph/badge.svg)](https://codecov.io/gh/petereast/rustdss)
+![Docker](https://github.com/petereast/rustdss/workflows/Docker/badge.svg)
+![Build and test rust project](https://github.com/petereast/rustdss/workflows/Build%20and%20test%20rust%20project/badge.svg)
+
 # rustdss
 
 > An implementation of something like Redis that uses exactly the same protocol, but with threads and memory safety.
