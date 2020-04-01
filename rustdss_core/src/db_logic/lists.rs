@@ -90,7 +90,7 @@ pub fn lrange(state: &CoreState, key: &Key, start: i64, end: i64) -> RespData {
         // We want the offset from the start
         let start_offset = start_front_or_back(total, start);
         if end >= 0 {
-            (end - start_offset as i64) as usize
+            (end - start_offset as i64) as usize + 1
         } else {
             println!("debug: {}", end);
             let end_abs = start_front_or_back(total, end);
@@ -522,9 +522,94 @@ mod lrange_should {
         assert_eq!(response3, RespData::List(vec![].into()));
     }
 
-    // list range
-    // not a list
-    // entire range
-    // negative indecies
-    // A mix of both posetive and negative range positions
+    #[test]
+    fn it_returns_a_complete_list() {
+        let source = RespData::List((0..10).map(RespData::Number).collect());
+        let mut keyval = HashMap::new();
+        keyval.insert("key".into(), source.clone());
+        let state = CoreState { keyval };
+
+        let response = lrange(&state, &"key".into(), 0, -1);
+        assert_eq!(response, source);
+    }
+
+    #[test]
+    fn return_a_subset_properly() {
+        let source = RespData::List((0..10).map(RespData::Number).collect());
+        let mut keyval = HashMap::new();
+        keyval.insert("key".into(), source.clone());
+        let state = CoreState { keyval };
+
+        let response = lrange(&state, &"key".into(), 3, 7);
+        assert_eq!(
+            response,
+            RespData::List(
+                vec![
+                    RespData::Number(3),
+                    RespData::Number(4),
+                    RespData::Number(5),
+                    RespData::Number(6),
+                    RespData::Number(7),
+                ]
+                .into()
+            )
+        );
+
+        let response = lrange(&state, &"key".into(), 0, 2);
+        assert_eq!(
+            response,
+            RespData::List(
+                vec![
+                    RespData::Number(0),
+                    RespData::Number(1),
+                    RespData::Number(2),
+                ]
+                .into()
+            )
+        );
+
+        let response = lrange(&state, &"key".into(), -3, -1);
+        assert_eq!(
+            response,
+            RespData::List(
+                vec![
+                    RespData::Number(7),
+                    RespData::Number(8),
+                    RespData::Number(9),
+                ]
+                .into()
+            )
+        );
+
+        let response = lrange(&state, &"key".into(), -7, 9);
+        assert_eq!(
+            response,
+            RespData::List(
+                vec![
+                    RespData::Number(3),
+                    RespData::Number(4),
+                    RespData::Number(5),
+                    RespData::Number(6),
+                    RespData::Number(7),
+                    RespData::Number(8),
+                    RespData::Number(9),
+                ]
+                .into()
+            )
+        );
+        let response = lrange(&state, &"key".into(), 3, -3);
+        assert_eq!(
+            response,
+            RespData::List(
+                vec![
+                    RespData::Number(3),
+                    RespData::Number(4),
+                    RespData::Number(5),
+                    RespData::Number(6),
+                    RespData::Number(7),
+                ]
+                .into()
+            )
+        );
+    }
 }
