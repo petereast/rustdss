@@ -1,4 +1,4 @@
-// Parses commands
+// Parses commands -- Maybe move this into rustdss_data or transport?
 use rustdss_data::{Command, RespData};
 
 pub trait ParseCommand {
@@ -112,6 +112,13 @@ impl ParseCommand for Command {
                     "rpop" => {
                         if let Some(arg0) = string_arg(data.next()) {
                             Ok(Command::Rpop(arg0))
+                        } else {
+                            Err("Not enough args".into())
+                        }
+                    }
+                    "llen" => {
+                        if let Some(arg0) = string_arg(data.next()) {
+                            Ok(Command::Llen(arg0))
                         } else {
                             Err("Not enough args".into())
                         }

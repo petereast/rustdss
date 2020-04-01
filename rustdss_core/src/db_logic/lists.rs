@@ -433,5 +433,12 @@ mod llen_should {
     }
 
     #[test]
-    fn it_returns_nil_when_the_list_isnt_there() {}
+    fn it_returns_nil_when_the_list_isnt_there() {
+        let state = CoreState {
+            keyval: HashMap::new(),
+        };
+
+        let response = llen(&state, &"key".into());
+        assert_eq!(response, RespData::nil());
+    }
 }
