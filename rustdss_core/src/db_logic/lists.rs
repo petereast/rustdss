@@ -78,11 +78,11 @@ pub fn llen(state: &CoreState, key: &Key) -> RespData {
 */
 
 pub fn lrange(state: &CoreState, key: &Key, start: i64, end: i64) -> RespData {
-    fn start_front_or_back(total: usize, start: i64) -> usize {
+    fn start_front_or_back(total: usize, start: i64) -> i64 {
         if start >= 0 {
-            start as usize
+            start
         } else {
-            (total + start as usize) as usize
+            total as i64 + start
         }
     }
 
@@ -90,10 +90,12 @@ pub fn lrange(state: &CoreState, key: &Key, start: i64, end: i64) -> RespData {
         // We want the offset from the start
         let start_offset = start_front_or_back(total, start);
         if end >= 0 {
-            (end as usize - start_offset) as usize
+            (end - start_offset as i64) as usize
         } else {
+            println!("debug: {}", end);
             let end_abs = start_front_or_back(total, end);
-            (end_abs - start_offset) as usize + 1
+            println!("debug_abs: {}", end_abs);
+            ((end_abs - start_offset) + 1) as usize
         }
     }
 
@@ -106,7 +108,7 @@ pub fn lrange(state: &CoreState, key: &Key, start: i64, end: i64) -> RespData {
                 let total = inner_list.len();
                 let result: VecDeque<RespData> = inner_list
                     .iter()
-                    .skip(start_front_or_back(total, start))
+                    .skip(start_front_or_back(total, start) as usize)
                     .take(end_front_or_back(total, start, end))
                     .map(|item| item.clone()) // ew gross - could be v expensive!
                     .collect();
@@ -504,7 +506,22 @@ mod lrange_should {
     use crate::CoreState;
     use std::collections::HashMap;
 
-    // empty list
+    #[test]
+    fn it_responds_with_an_empty_list_when_the_list_is_empty() {
+        let mut keyval = HashMap::new();
+        keyval.insert("key".into(), RespData::List(vec![].into()));
+
+        let state = CoreState { keyval };
+
+        let response1 = lrange(&state, &"key".into(), 0, -1);
+        let response2 = lrange(&state, &"key".into(), -1, 0);
+        let response3 = lrange(&state, &"key".into(), -1, -1);
+
+        assert_eq!(response1, RespData::List(vec![].into()));
+        assert_eq!(response2, RespData::List(vec![].into()));
+        assert_eq!(response3, RespData::List(vec![].into()));
+    }
+
     // list range
     // not a list
     // entire range
