@@ -1,12 +1,12 @@
-[![codecov](https://codecov.io/gh/petereast/rustdss/branch/master/graph/badge.svg)](https://codecov.io/gh/petereast/rustdss)
-![Docker](https://github.com/petereast/rustdss/workflows/Docker/badge.svg)
-![Build and test rust project](https://github.com/petereast/rustdss/workflows/Build%20and%20test%20rust%20project/badge.svg)
-
 # rustdss
 
 > An implementation of something like Redis that uses exactly the same protocol, but with threads and memory safety.
 
 **This is very much a pet project and should absolutely not be used in production, unless you want production to break and/or have terrible performance. I would love for this to be used eventually, but there's a mountain of work to do before that would be possible, so please feel free to raise issues and PRs to help eventually make this into something useful**
+
+[![codecov](https://codecov.io/gh/petereast/rustdss/branch/master/graph/badge.svg)](https://codecov.io/gh/petereast/rustdss)
+![Docker](https://github.com/petereast/rustdss/workflows/Docker/badge.svg)
+![Build and test rust project](https://github.com/petereast/rustdss/workflows/Build%20and%20test%20rust%20project/badge.svg)
 
 It contains the following modules
 - `Connection`: deals with incoming connections, exists for the lifetime of a connection
