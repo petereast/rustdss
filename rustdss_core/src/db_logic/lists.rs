@@ -3,6 +3,7 @@
 
 use crate::CoreState;
 use rustdss_data::{Key, RespData};
+use std::collections::VecDeque;
 
 pub fn lpush(state: &mut CoreState, key: &Key, data: RespData) -> RespData {
     match state.keyval.get_mut(key) {
@@ -64,6 +65,60 @@ pub fn llen(state: &CoreState, key: &Key) -> RespData {
         })
         .unwrap_or(RespData::nil())
 }
+/*
+  From redis.io/commands/lrange:
+
+  Returns the specified elements of the list stored at key. The offsets start
+  and stop are zero-based indexes, with 0 being the first element of the list
+  (the head of the list), 1 being the next element and so on.
+
+  These offsets can also be negative numbers indicating offsets starting at the
+  end of the list. For example, -1 is the last element of the list, -2 the
+  penultimate, and so on.
+*/
+
+pub fn lrange(state: &CoreState, key: &Key, start: i64, end: i64) -> RespData {
+    fn start_front_or_back(total: usize, start: i64) -> usize {
+        if start >= 0 {
+            start as usize
+        } else {
+            (total + start as usize) as usize
+        }
+    }
+
+    fn end_front_or_back(total: usize, start: i64, end: i64) -> usize {
+        // We want the offset from the start
+        let start_offset = start_front_or_back(total, start);
+        if end >= 0 {
+            (end as usize - start_offset) as usize
+        } else {
+            let end_abs = start_front_or_back(total, end);
+            (end_abs - start_offset) as usize + 1
+        }
+    }
+
+    state
+        .keyval
+        .get(key)
+        .and_then(|entry| match entry {
+            RespData::List(inner_list) => {
+                // This is where the complicated behaviour happens
+                let total = inner_list.len();
+                let result: VecDeque<RespData> = inner_list
+                    .iter()
+                    .skip(start_front_or_back(total, start))
+                    .take(end_front_or_back(total, start, end))
+                    .map(|item| item.clone()) // ew gross - could be v expensive!
+                    .collect();
+
+                //
+                Some(RespData::List(result))
+            }
+            _ => None,
+        })
+        .unwrap_or(RespData::nil())
+}
+
 #[cfg(test)]
 mod lpush_should {
     use super::*;
@@ -441,4 +496,18 @@ mod llen_should {
         let response = llen(&state, &"key".into());
         assert_eq!(response, RespData::nil());
     }
+}
+
+#[cfg(test)]
+mod lrange_should {
+    use super::*;
+    use crate::CoreState;
+    use std::collections::HashMap;
+
+    // empty list
+    // list range
+    // not a list
+    // entire range
+    // negative indecies
+    // A mix of both posetive and negative range positions
 }
