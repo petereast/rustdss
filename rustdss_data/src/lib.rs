@@ -49,6 +49,7 @@ pub enum Command {
     Lpush(Key, RespData),
     Rpop(Key),
     Rpush(Key, RespData),
+    Llen(Key),
     Keys,
     Info,
     FlushAll,

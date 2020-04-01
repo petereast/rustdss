@@ -17,6 +17,7 @@ pub fn core_logic(state: &mut CoreState, cmd: Command) -> RespData {
         Command::Rpop(key) => lists::rpop(state, &key),
         Command::Lpush(key, value) => lists::lpush(state, &key, value),
         Command::Rpush(key, value) => lists::rpush(state, &key, value),
+        Command::Llen(key) => lists::llen(state, &key),
         Command::Keys => admin::keys(state),
         Command::FlushAll => admin::flushall(state),
         Command::Dump(key) => admin::dump(state, &key),
