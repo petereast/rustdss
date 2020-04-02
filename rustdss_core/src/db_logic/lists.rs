@@ -92,9 +92,7 @@ pub fn lrange(state: &CoreState, key: &Key, start: i64, end: i64) -> RespData {
         if end >= 0 {
             (end - start_offset as i64) as usize + 1
         } else {
-            println!("debug: {}", end);
             let end_abs = start_front_or_back(total, end);
-            println!("debug_abs: {}", end_abs);
             ((end_abs - start_offset) + 1) as usize
         }
     }
