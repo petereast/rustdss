@@ -16,9 +16,9 @@ impl Connection {
 
         let bufreader: BufReader<TcpStream> = BufReader::new(stream.try_clone().unwrap());
 
-        let mut byte_stream = &mut bufreader
+        let mut byte_stream = bufreader
             .bytes()
-            .map(|item| item.expect("should be achar") as char);
+            .map(|item| item.expect("should be a char") as char);
 
         let mut database_id = None;
         loop {
@@ -33,9 +33,9 @@ impl Connection {
 
                 database_id = new_database_id;
 
-                stream
-                    .write(response.as_string().as_bytes())
-                    .expect("Can't write to socket");
+                response
+                    .write_to_stream(stream)
+                    .expect("Can't write to stream");
             } else {
                 break;
             }
@@ -45,6 +45,7 @@ impl Connection {
     pub fn start(outer_core_sender: Sender<Message>) -> std::io::Result<Self> {
         println!("[connection] Starting to listen to connections");
 
+        // TODO: Take this value out of a config file or command line args
         let listener = TcpListener::bind("0.0.0.0:6380")?;
 
         for stream in listener.incoming() {

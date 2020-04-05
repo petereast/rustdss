@@ -1,9 +1,12 @@
 // Provide an implementation of a serde serialiser for RESP data
 use rustdss_data::RespData;
 use std::collections::VecDeque;
+use std::io::{BufWriter, Write};
+use std::net::TcpStream;
 
 pub trait SerialiseRespData {
     fn as_string(&self) -> String;
+    fn write_to_stream(&self, stream: &mut TcpStream) -> Result<(), std::io::Error>;
 }
 
 fn serialise_list(items: &VecDeque<RespData>) -> String {
@@ -26,6 +29,38 @@ impl SerialiseRespData for RespData {
             RespData::List(items) => serialise_list(items),
             RespData::NullString => "$-1\r\n".into(),
         }
+    }
+
+    fn write_to_stream(&self, stream: &mut TcpStream) -> Result<(), std::io::Error> {
+        match self {
+            RespData::SimpleStr(data) => {
+                stream.write(self.as_string().as_bytes())?;
+            }
+            RespData::Number(num) => {
+                stream.write(self.as_string().as_bytes())?;
+            }
+            RespData::BulkStr(inner) => {
+                // Chunk the bulk string into the size of the buffer?
+                stream.write(self.as_string().as_bytes())?;
+            }
+            RespData::Error(text) => {
+                stream.write(self.as_string().as_bytes())?;
+            }
+            RespData::NullString => {
+                stream.write("$-1\r\n".as_bytes())?;
+            }
+            RespData::List(items) => {
+                stream.write(format!("*{}\r\n", items.len()).as_bytes())?;
+                let mut writer = BufWriter::new(stream);
+                for item in items {
+                    writer.write(item.as_string().as_bytes())?;
+                }
+
+                writer.flush();
+            }
+        }
+        // bufwriter.flush()
+        Ok(())
     }
 }
 
